@@ -1,8 +1,29 @@
-import { Button } from "@/components/ui/button";
-import { getMainCategoriesCount } from "../_lib/data_service";
+"use client";
 
-export default async function CategoriesBar() {
-  const itemsCount = await getMainCategoriesCount();
+import { useRouter, useSearchParams } from "next/navigation";
+
+import { Button } from "@/components/ui/button";
+
+import { CategoryCount } from "../_types";
+
+interface CategoriesBarProps {
+  currentCategory: string;
+  itemsCount: CategoryCount[];
+}
+
+export default function CategoriesBar({
+  currentCategory,
+  itemsCount,
+}: CategoriesBarProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const handleCategoryChange = (newCategory: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("category", newCategory);
+    params.set("page", "1");
+    router.push(`/items?${params.toString()}`);
+  };
 
   if (!itemsCount) {
     return <div>Failed to load items</div>;
@@ -21,7 +42,12 @@ export default async function CategoriesBar() {
           {itemsCountAll.map((category) => (
             <Button
               key={category.main_category}
-              variant={category.main_category === "all" ? "default" : "outline"}
+              variant={
+                currentCategory === category.main_category
+                  ? "default"
+                  : "outline"
+              }
+              onClick={() => handleCategoryChange(category.main_category)}
               className="shrink-0"
             >
               <span>{category.main_category}</span>

@@ -1,42 +1,30 @@
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
+  getItemBySearchParams,
+  getMainCategoriesCount,
+} from "../_lib/data_service";
 
-import { Search } from "lucide-react";
-
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
-import { Input } from "@/components/ui/input";
-import { getItemByPage } from "../_lib/data_service";
+import ItemsGrid from "../_components/ItemsGrid";
 import CategoriesBar from "../_components/CategoriesBar";
-import Image from "next/image";
+import OptionBar from "../_components/OptionBar";
+import PaginationBar from "../_components/PaginationBar";
 
-import { Database } from "@/app/_lib/database.types";
-type Json = Database["public"]["Tables"]["items"]["Row"]["images"];
+import { SortOption, PageOption } from "../_types";
 
 export const metadata = {
   title: "Items",
 };
 
-const sortOptions = [
+const sortOptions: Array<SortOption> = [
   { value: "newest", label: "Newest First" },
   { value: "price-low", label: "Price: Low to High" },
   { value: "price-high", label: "Price: High to Low" },
 ];
+
+interface SearchParams {
+  page?: string;
+  category?: string;
+  sort?: string;
+}
 
 ////// reference
 // const categories = {
@@ -48,114 +36,43 @@ const sortOptions = [
 //   'others': ['collectibles', 'instruments', 'board_games', 'bike', 'decorations']
 // };
 
-export default async function ItemsPage() {
-  const items = await getItemByPage();
-  if (!items) {
-    return <div>Failed to load items</div>;
+export default async function ItemsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  async function getParams() {
+    return {
+      page: Number(searchParams.page) || 1,
+      category: searchParams.category || "all",
+      sort: searchParams.sort || "newest",
+    };
   }
 
-  function getImageUrls(imageJson: Json): string[] {
-    if (!imageJson) return [];
+  const { page, category, sort } = await getParams();
 
-    try {
-      const cleanJson =
-        typeof imageJson === "string"
-          ? imageJson
-              .replace(/^{/, "[")
-              .replace(/}$/, "]")
-              .replace(/"{2,}/g, '"')
-          : JSON.stringify(imageJson);
+  const { items, totalPages } = await getItemBySearchParams(
+    page,
+    category,
+    sort
+  );
+  const itemsCount = await getMainCategoriesCount();
 
-      const parsed = JSON.parse(cleanJson);
-      return (Array.isArray(parsed) ? parsed : [parsed]) as string[];
-    } catch (error) {
-      console.error("Error parsing image JSON:", error);
-      return [];
-    }
+  const pageOptions: PageOption = {
+    currentPage: page,
+    totalPages: totalPages,
+  };
+
+  if (!items || !itemsCount) {
+    return <div>Failed to load items</div>;
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <div className="flex flex-col sm:flex-row gap-12 mb-8">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-          <Input placeholder="Search items..." className="pl-10" />
-        </div>
-        <Select>
-          <SelectTrigger className="w-[180px]">
-            <SelectValue placeholder="Sort by" />
-          </SelectTrigger>
-          <SelectContent>
-            {sortOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <CategoriesBar />
-
-      {/* Items Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        {items.map((item) => (
-          <Card key={item.id} className="w-full">
-            <div className="p-4">
-              <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
-                {getImageUrls(item.images).map((url, index) => (
-                  <Image
-                    key={url}
-                    src={url}
-                    alt={`${item.title} - ${index + 1}`}
-                    width={400}
-                    height={400}
-                  />
-                ))}
-              </div>
-              <h3 className="font-semibold">{item.title}</h3>
-              <p className="text-lg font-bold text-[#2a2f33] mt-1">
-                ${item.price}
-              </p>
-              <p className="text-gray-500 text-sm">Posted 2 days ago</p>
-              <div className="flex gap-2 mt-3">
-                <Button variant="outline" size="sm" className="w-full">
-                  Details
-                </Button>
-                <Button size="sm" className="w-full">
-                  Wishlist
-                </Button>
-              </div>
-            </div>
-          </Card>
-        ))}
-      </div>
-
-      {/* Pagination */}
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious href="#" />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">1</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#" isActive>
-              2
-            </PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationLink href="#">3</PaginationLink>
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationEllipsis />
-          </PaginationItem>
-          <PaginationItem>
-            <PaginationNext href="#" />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+      <OptionBar sortOptions={sortOptions} currentSort={sort} />
+      <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
+      <ItemsGrid items={items} />
+      <PaginationBar pageOption={pageOptions} />
     </div>
   );
 }
