@@ -66,35 +66,38 @@ export type Database = {
       }
       items: {
         Row: {
+          categories: string
           created_at: string
-          description: string | null
+          description: string
           id: number
-          images: Json | null
-          price: number | null
-          seller_id: number | null
-          status: string | null
+          images: string
+          price: number
+          seller_id: number
+          status: string
           title: string
           update_at: string | null
         }
         Insert: {
+          categories: string
           created_at?: string
-          description?: string | null
+          description: string
           id?: number
-          images?: Json | null
-          price?: number | null
-          seller_id?: number | null
-          status?: string | null
+          images: string
+          price: number
+          seller_id: number
+          status?: string
           title: string
           update_at?: string | null
         }
         Update: {
+          categories?: string
           created_at?: string
-          description?: string | null
+          description?: string
           id?: number
-          images?: Json | null
-          price?: number | null
-          seller_id?: number | null
-          status?: string | null
+          images?: string
+          price?: number
+          seller_id?: number
+          status?: string
           title?: string
           update_at?: string | null
         }
@@ -222,7 +225,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_main_categories_count: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          main_category: string
+          count: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
