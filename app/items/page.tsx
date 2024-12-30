@@ -1,5 +1,5 @@
 import {
-  getItemBySearchParams,
+  getItemsBySearchParams,
   getMainCategoriesCount,
 } from "../_lib/data_service";
 
@@ -41,17 +41,19 @@ export default async function ItemsPage({
 }: {
   searchParams: SearchParams;
 }) {
-  async function getParams() {
+  const awaitedSearchParams = await searchParams;
+
+  function getParams() {
     return {
-      page: Number(searchParams.page) || 1,
-      category: searchParams.category || "all",
-      sort: searchParams.sort || "newest",
+      page: Number(awaitedSearchParams?.page) || 1,
+      category: awaitedSearchParams?.category || "all",
+      sort: awaitedSearchParams?.sort || "newest",
     };
   }
 
   const { page, category, sort } = await getParams();
 
-  const { items, totalPages } = await getItemBySearchParams(
+  const { items, totalPages } = await getItemsBySearchParams(
     page,
     category,
     sort

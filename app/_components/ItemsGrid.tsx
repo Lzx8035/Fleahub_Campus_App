@@ -1,45 +1,24 @@
 "use client";
 
 import Image from "next/image";
-
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-
-import { Database } from "@/app/_lib/database.types";
-
-type Json = Database["public"]["Tables"]["items"]["Row"]["images"];
-type Item = Database["public"]["Tables"]["items"]["Row"];
+import { Item } from "../_types";
+import Link from "next/link";
+import { getImageUrls } from "../_lib/utils";
+import { formatDistanceToNow } from "date-fns";
 
 interface ItemsGridProps {
   items: Item[];
 }
 
 export default function ItemsGrid({ items }: ItemsGridProps) {
-  function getImageUrls(imageJson: Json): string[] {
-    if (!imageJson) return [];
-
-    try {
-      if (typeof imageJson === "string") {
-        return JSON.parse(imageJson) as string[];
-      }
-
-      if (Array.isArray(imageJson)) {
-        return imageJson as string[];
-      }
-
-      return [];
-    } catch (error) {
-      console.error("Error parsing image JSON:", error);
-      return [];
-    }
-  }
-
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       {items.map((item) => (
         <Card key={item.id} className="w-full">
-          <div className="p-4">
-            <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden">
+          <div className="p-4 flex flex-col h-full">
+            <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden flex-shrink-0">
               {getImageUrls(item.images)[0] && (
                 <Image
                   src={getImageUrls(item.images)[0]}
@@ -51,18 +30,26 @@ export default function ItemsGrid({ items }: ItemsGridProps) {
                 />
               )}
             </div>
-            <h3 className="font-semibold">{item.title}</h3>
-            <p className="text-lg font-bold text-[#2a2f33] mt-1">
-              ${item.price}
-            </p>
-            <p className="text-gray-500 text-sm">Posted 2 days ago</p>
-            <div className="flex gap-2 mt-3">
-              <Button variant="outline" size="sm" className="w-full">
-                Details
-              </Button>
-              <Button size="sm" className="w-full">
-                Wishlist
-              </Button>
+            <div className="flex-grow">
+              <h3 className="font-semibold">{item.title}</h3>
+            </div>
+            <div>
+              <p className="text-lg font-bold text-[#2a2f33] mb-2">
+                ${item.price}
+              </p>
+              <p className="text-gray-500 text-sm mb-2">
+                {formatDistanceToNow(new Date(item.created_at), {
+                  addSuffix: true,
+                })}
+              </p>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="w-full" asChild>
+                  <Link href={`/items/${item.id}`}>Details</Link>
+                </Button>
+                <Button size="sm" className="w-full">
+                  Add to Wishlist
+                </Button>
+              </div>
             </div>
           </div>
         </Card>

@@ -1,10 +1,6 @@
 import supabase from "./supabase";
-import { Database } from "@/app/_lib/database.types";
 
-import { CategoryCount } from "../_types";
-
-type User = Database["public"]["Tables"]["users"]["Row"];
-type Item = Database["public"]["Tables"]["items"]["Row"];
+import { CategoryCount, Item, ItemDetail, User } from "../_types";
 
 ////// User
 export async function getUser(id: number): Promise<User | null> {
@@ -22,29 +18,8 @@ export async function getUser(id: number): Promise<User | null> {
   return user;
 }
 
-/////// Items
-// Get items by page
-export async function getItemByPage(page: number = 1): Promise<Item[] | null> {
-  const pageSize = 16;
-
-  const from = (page - 1) * pageSize;
-  const to = from + pageSize - 1;
-
-  const { data: items, error } = await supabase
-    .from("items")
-    .select("*")
-    .range(from, to);
-
-  if (error) {
-    console.error(error);
-    return null;
-  }
-
-  console.log(items);
-  return items;
-}
-
-// get mian Item Count
+////// Items
+// use in category bar
 export async function getMainCategoriesCount(): Promise<
   CategoryCount[] | null
 > {
@@ -60,7 +35,8 @@ export async function getMainCategoriesCount(): Promise<
   return itemCount;
 }
 
-export async function getItemBySearchParams(
+// used in items page
+export async function getItemsBySearchParams(
   page: number = 1,
   category: string = "all",
   sort: string = "newest"
@@ -100,4 +76,32 @@ export async function getItemBySearchParams(
     items,
     totalPages,
   };
+}
+
+// use in item details
+// TODO: Include all info in items details, like messages, seller id and avatar, appointment, whether in wishlist or not
+export default async function getItemDetail(
+  id: number
+): Promise<ItemDetail | null> {
+  const { data: item, error } = await supabase
+    .from("items")
+    .select(
+      `
+    *,
+    seller:users!seller_id (
+      id,
+      name,
+      avatar_url
+    )
+  `
+    )
+    .eq("id", id)
+    .single();
+
+  if (error) {
+    console.error(error);
+    return null;
+  }
+
+  return item;
 }
