@@ -2,9 +2,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import UserMenu from "./UserMenu";
+
+// TODO
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 
 export default async function Header() {
   const supabase = createServerComponentClient({ cookies });

@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import getItemDetail from "@/app/_lib/data_service";
+import { getItemDetail } from "@/app/_lib/data_service";
 import { notFound } from "next/navigation";
 import { Heart, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -40,17 +40,17 @@ export default async function ItemDetailPage({
               </div>
 
               <div className="flex items-center gap-3">
-                {item.seller.avatar_url ? (
+                {item?.seller?.avatar_url ? (
                   <img
                     src={item.seller.avatar_url}
-                    alt={item.seller.name}
+                    alt={`${item.seller.name}`}
                     className="h-12 w-12 rounded-full object-cover"
                   />
                 ) : (
                   <div className="h-12 w-12 bg-gray-200 rounded-full" />
                 )}
                 <div>
-                  <p className="font-medium">{item.seller.name}</p>
+                  <p className="font-medium">{item?.seller?.name}</p>
                   <p className="text-sm text-gray-500">
                     {" "}
                     {formatDistanceToNow(new Date(item.created_at), {
