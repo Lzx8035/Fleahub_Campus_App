@@ -1,23 +1,56 @@
-import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
+import { createServerClient, CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function GET(request: NextRequest) {
-  // 从请求 URL 中提取认证码
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
 
-  if (code) {
-    // 创建 supabase 路由处理客户端
-    const supabase = createRouteHandlerClient({ cookies });
-    // 将认证码转换为用户会话
-    const {
-      data: { user },
-    } = await supabase.auth.exchangeCodeForSession(code);
-    console.log("User in callback:", user);
+  if (!code) {
+    console.error("No code in callback");
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // 认证完成后重定向到首页或dashboard
-  return NextResponse.redirect(new URL("/", request.url));
+  try {
+    const response = NextResponse.redirect(new URL("/", request.url));
+
+    // 修改这里：等待 cookies() Promise
+    const cookieStore = await cookies();
+
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: CookieOptions) {
+            response.cookies.set(name, value, options);
+          },
+          remove(name: string, options: CookieOptions) {
+            response.cookies.set(name, "", { ...options, maxAge: 0 });
+          },
+        },
+      }
+    );
+
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error("Session exchange error:", error);
+      return NextResponse.redirect(new URL("/login", request.url));
+    }
+
+    console.log("Session created successfully:", !!session);
+
+    return response;
+  } catch (error) {
+    console.error("Unexpected error in callback:", error);
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
 }

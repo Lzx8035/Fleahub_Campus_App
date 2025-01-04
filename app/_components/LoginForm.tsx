@@ -2,47 +2,61 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { createBrowserClient } from "@supabase/ssr";
 import { useState, useEffect } from "react";
-// TODO
-import type { User } from "@supabase/auth-helpers-nextjs";
+import type { User } from "@supabase/supabase-js";
 
 export function LoginForm() {
-  const supabase = createClientComponentClient();
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    // TODO
     const checkUser = async () => {
-      const {
-        data: { user: currentUser },
-      } = await supabase.auth.getUser();
-      setUser(currentUser);
+      try {
+        const {
+          data: { user: currentUser },
+        } = await supabase.auth.getUser();
+        setUser(currentUser);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+      }
     };
+
     checkUser();
-  }, [supabase.auth]);
+  }, [supabase]);
 
   const handleSignIn = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        // prompt: "select_account", //!!!???NONOBUG
-        redirectTo: `${location.origin}/auth/callback`,
-      },
-    });
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: `${location.origin}/auth/callback`,
+        },
+      });
 
-    if (error) {
-      console.error("Error:", error.message);
+      if (error) {
+        console.error("Error signing in:", error.message);
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign-in:", error);
     }
   };
 
   const handleSignOut = async () => {
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      console.error("Error signing out:", error.message);
-    } else {
-      setUser(null);
-      console.log("Successfully signed out");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error("Error signing out:", error.message);
+      } else {
+        setUser(null);
+        console.log("Successfully signed out");
+      }
+    } catch (error) {
+      console.error("Unexpected error during sign-out:", error);
     }
   };
 

@@ -1,9 +1,29 @@
-import { createClient } from "./supabase/server";
+import { createServerClient } from "@supabase/ssr";
+import { cookies } from "next/headers";
 import { CategoryCount, Item, User } from "../_types";
 
-////// User
+async function getSupabaseClient() {
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  const cookieStore = await cookies();
+
+  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    cookies: {
+      getAll() {
+        return cookieStore.getAll();
+      },
+      setAll(cookiesToSet) {
+        cookiesToSet.forEach(({ name, value, options }) =>
+          cookieStore.set(name, value, options)
+        );
+      },
+    },
+  });
+}
+
 export async function getUser(id: number): Promise<User | null> {
-  const supabase = await createClient();
+  const supabase = await getSupabaseClient();
 
   const { data: user, error } = await supabase
     .from("users")
@@ -20,14 +40,13 @@ export async function getUser(id: number): Promise<User | null> {
 }
 
 ////// Items
-// use in category bar
 export async function getMainCategoriesCount(): Promise<
   CategoryCount[] | null
 > {
-  const supabase = await createClient();
+  const supabase = await getSupabaseClient();
 
   const { data: itemCount, error } = await supabase.rpc(
-    "get_main_categories_count" as never // ???
+    "get_main_categories_count"
   );
 
   if (error) {
@@ -38,13 +57,12 @@ export async function getMainCategoriesCount(): Promise<
   return itemCount;
 }
 
-// used in items page
 export async function getItemsBySearchParams(
   page: number = 1,
   category: string = "all",
   sort: string = "newest"
 ): Promise<{ items: Item[] | null; totalPages: number }> {
-  const supabase = await createClient();
+  const supabase = await getSupabaseClient();
   const pageSize = 16;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -85,12 +103,9 @@ export async function getItemsBySearchParams(
   };
 }
 
-// use in item details ???
-// export async function getItemDetail(
-//   id: number
-// ): Promise<ItemDetail | null> {
+// TODO
 export async function getItemDetail(id: number) {
-  const supabase = await createClient();
+  const supabase = await getSupabaseClient();
 
   const { data: item, error } = await supabase
     .from("items")

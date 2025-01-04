@@ -1,11 +1,18 @@
 import { createBrowserClient } from "@supabase/ssr";
 import { Database } from "@/app/_lib/database.types";
 
+// 创建 Supabase 浏览器客户端
 export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
+  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error(
+      "Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY) are missing."
+    );
+  }
+
+  return createBrowserClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
 }
 
 // 这是 Next.js App Router 和 Supabase 新的最佳实践,根据运行环境分开了 client 和 server:
