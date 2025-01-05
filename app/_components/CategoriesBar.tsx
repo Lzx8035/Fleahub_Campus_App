@@ -30,9 +30,16 @@ export default function CategoriesBar({
   }
 
   const totalNum = itemsCount.reduce((sum, cat) => sum + Number(cat.count), 0);
-  const itemsCountAll = [
+
+  const othersItem = itemsCount.find((item) => item.main_category === "others");
+  const nonOthersItems = itemsCount.filter(
+    (item) => item.main_category !== "others"
+  );
+
+  const itemsCountAll: CategoryCount[] = [
     { main_category: "all", count: totalNum },
-    ...itemsCount,
+    ...nonOthersItems,
+    ...(othersItem ? [othersItem] : []),
   ];
 
   return (

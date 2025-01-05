@@ -13,8 +13,6 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
 export default function UserMenu({ user }: { user: User }) {
-  console.log(user);
-
   const router = useRouter();
 
   const supabase = createBrowserClient(

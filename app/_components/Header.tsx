@@ -26,9 +26,12 @@ export default async function Header() {
     }
   );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+  // 修改 1: 获取 session 和 user
+  const [
+    {
+      data: { user },
+    },
+  ] = await Promise.all([supabase.auth.getUser()]);
 
   const publicNavigation = [
     { name: "Home", href: "/" },
@@ -40,7 +43,8 @@ export default async function Header() {
     { name: "My Account", href: "/account" },
   ];
 
-  const navigation = session
+  // 修改 2: 使用 user 来判断是否登录
+  const navigation = user
     ? [...publicNavigation, ...protectedNavigation]
     : publicNavigation;
 
@@ -68,8 +72,9 @@ export default async function Header() {
                 {item.name}
               </Link>
             ))}
-            {session ? (
-              <UserMenu user={session.user} />
+            {/* 修改 3: 传递 user 而不是 session.user */}
+            {user ? (
+              <UserMenu user={user} />
             ) : (
               <Button asChild>
                 <Link href="/login">Login</Link>
@@ -95,8 +100,9 @@ export default async function Header() {
                     {item.name}
                   </Link>
                 ))}
-                {session ? (
-                  <UserMenu user={session.user} />
+                {/* 修改 4: 这里也使用 user */}
+                {user ? (
+                  <UserMenu user={user} />
                 ) : (
                   <Button asChild>
                     <Link href="/login">Login</Link>

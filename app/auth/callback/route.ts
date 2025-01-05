@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
   try {
     const response = NextResponse.redirect(new URL("/", request.url));
 
-    // 修改这里：等待 cookies() Promise
     const cookieStore = await cookies();
 
     const supabase = createServerClient(

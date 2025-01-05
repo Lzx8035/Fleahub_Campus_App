@@ -9,13 +9,16 @@ const nextConfig: NextConfig = {
         port: "",
         pathname: "/storage/v1/object/public/**",
       },
-      //   {
-      //     protocol: "https",
-      //     hostname: "api.dicebear.com",
-      //     port: "",
-      //     pathname: "/7.x/**",
-      //   },
     ],
+  },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        punycode: false,
+      };
+    }
+    return config;
   },
 };
 

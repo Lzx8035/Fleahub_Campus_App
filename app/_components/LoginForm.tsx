@@ -35,6 +35,9 @@ export function LoginForm() {
         provider: "google",
         options: {
           redirectTo: `${location.origin}/auth/callback`,
+          queryParams: {
+            prompt: "select_account", // 添加这行
+          },
         },
       });
 

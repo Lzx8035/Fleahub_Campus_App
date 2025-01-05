@@ -1,5 +1,9 @@
 import Spinner from "@/app/_components/Spinner";
 
 export default function Loading() {
-  return <Spinner />;
+  return (
+    <div className="relative min-h-screen">
+      <Spinner />
+    </div>
+  );
 }
