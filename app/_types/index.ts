@@ -26,17 +26,21 @@ export interface Seller {
   avatar_url: string | null;
 }
 
-export interface ItemDetail {
-  id: number;
-  title: string;
-  price: number;
-  description: string;
-  category: string;
-  images: {
-    images: string[];
-  };
-  status: string;
-  created_at: string;
-  seller_id: number;
-  seller: Seller;
-}
+// ???
+// export interface ItemDetail {
+//   id: number;
+//   title: string;
+//   price: number;
+//   description: string;
+//   categories: string;
+//   images: string;
+//   status: string;
+//   created_at: string;
+//   update_at: string | null;
+//   seller_id: number;
+//   seller: {
+//     id: number;
+//     name: string;
+//     avatar_url: string | null;
+//   };
+// }

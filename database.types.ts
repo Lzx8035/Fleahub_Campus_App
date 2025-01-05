@@ -17,7 +17,6 @@ export type Database = {
           item_id: number | null
           meeting_location: string | null
           meeting_time: string | null
-          seller_id: number | null
           status: string | null
         }
         Insert: {
@@ -27,7 +26,6 @@ export type Database = {
           item_id?: number | null
           meeting_location?: string | null
           meeting_time?: string | null
-          seller_id?: number | null
           status?: string | null
         }
         Update: {
@@ -37,7 +35,6 @@ export type Database = {
           item_id?: number | null
           meeting_location?: string | null
           meeting_time?: string | null
-          seller_id?: number | null
           status?: string | null
         }
         Relationships: [
@@ -53,13 +50,6 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "items"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "appointments_seller_id_fkey"
-            columns: ["seller_id"]
-            isOneToOne: false
-            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]
@@ -164,23 +154,23 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
-          email: string | null
+          email: string
           id: number
-          name: string | null
+          name: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
-          email?: string | null
+          email: string
           id?: number
-          name?: string | null
+          name: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
-          email?: string | null
+          email?: string
           id?: number
-          name?: string | null
+          name?: string
         }
         Relationships: []
       }

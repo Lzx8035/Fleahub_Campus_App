@@ -8,18 +8,25 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-// import Link from "next/link";
+import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 
 export default function UserMenu({ user }: { user: User }) {
   const router = useRouter();
-  const supabase = createClientComponentClient();
+
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.refresh();
+    try {
+      await supabase.auth.signOut();
+      router.refresh(); // 刷新页面以更新状态
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
   };
 
   return (
@@ -28,8 +35,8 @@ export default function UserMenu({ user }: { user: User }) {
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
             <AvatarImage
-              src={user?.user_metadata?.avatar_url}
-              alt={user?.email || ""}
+              src={user?.user_metadata?.avatar_url || ""}
+              alt={user?.email || "User"}
             />
             <AvatarFallback>
               {user?.email?.[0]?.toUpperCase() || "U"}

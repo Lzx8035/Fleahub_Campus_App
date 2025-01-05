@@ -36,11 +36,12 @@ function ImageCarousel({ images }: ImageCarouselProps) {
               src={src}
               alt={`Product image ${index + 1}`}
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               className={cn(
                 "object-cover transition-opacity duration-300",
                 isLoading ? "opacity-0" : "opacity-100"
               )}
-              onLoadingComplete={() => setIsLoading(false)}
+              onLoad={() => setIsLoading(false)}
               priority={index === 0}
             />
           </div>
