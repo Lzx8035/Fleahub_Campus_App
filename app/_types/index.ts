@@ -1,4 +1,4 @@
-import { Database } from "@/app/_lib/database.types";
+import { Database } from "@/database.types";
 
 export type User = Database["public"]["Tables"]["users"]["Row"];
 export type Item = Database["public"]["Tables"]["items"]["Row"];
@@ -20,11 +20,15 @@ export type CategoryCount = {
 };
 
 ////////////
-export interface Seller {
-  id: number;
-  name: string;
-  avatar_url: string | null;
-}
+// type Seller = {
+//   id: Database["public"]["Tables"]["users"]["Row"]["id"];
+//   name: Database["public"]["Tables"]["users"]["Row"]["name"];
+//   avatar_url: Database["public"]["Tables"]["users"]["Row"]["avatar_url"];
+// };
+
+// export type ItemDetail = Database["public"]["Tables"]["items"]["Row"] & {
+//   seller: Seller;
+// };
 
 // ???
 // export interface ItemDetail {

@@ -1,5 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
-import { Database } from "@/app/_lib/database.types";
+import { Database } from "@/database.types";
 
 // 创建 Supabase 浏览器客户端
 export function createClient() {
