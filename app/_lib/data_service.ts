@@ -1,11 +1,11 @@
 import { CategoryCount, Item, User } from "../_types";
+// Public
 import { createClient as createBrowserClient } from "./supabase/client";
+// With auth
 import { createClient as createServerClient } from "./supabase/server";
 
-const supabaseClient = createBrowserClient();
-const supabaseServer = await createServerClient();
-
 export async function getUser(id: number): Promise<User | null> {
+  const supabaseClient = createBrowserClient();
   const { data: user, error } = await supabaseClient
     .from("users")
     .select("*")
@@ -24,6 +24,7 @@ export async function getUser(id: number): Promise<User | null> {
 export async function getMainCategoriesCount(): Promise<
   CategoryCount[] | null
 > {
+  const supabaseClient = createBrowserClient();
   const { data: itemCount, error } = await supabaseClient.rpc(
     "get_main_categories_count" as never
   );
@@ -41,6 +42,8 @@ export async function getItemsBySearchParams(
   category: string = "all",
   sort: string = "newest"
 ): Promise<{ items: Item[] | null; totalPages: number }> {
+  const supabaseClient = createBrowserClient();
+
   const pageSize = 16;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -82,6 +85,7 @@ export async function getItemsBySearchParams(
 }
 
 export async function getItemDetail(id: number) {
+  const supabaseClient = createBrowserClient();
   const { data: item, error } = await supabaseClient
     .from("items")
     .select(
@@ -106,7 +110,9 @@ export async function getItemDetail(id: number) {
   return item;
 }
 
+// include sold/reserve items
 export async function getUserWishlist() {
+  const supabaseServer = await createServerClient();
   const {
     data: { user },
     error: userError,
@@ -156,7 +162,8 @@ export async function getUserWishlist() {
         title,
         price,
         images,
-        status
+        status,
+        description
       )
     `
     )

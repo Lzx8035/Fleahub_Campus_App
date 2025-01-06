@@ -74,7 +74,7 @@ export default async function ItemsPage({
       <OptionBar sortOptions={sortOptions} currentSort={sort} />
       <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
       <ItemsGrid items={items} />
-      <PaginationBar pageOption={pageOptions} />
+      <PaginationBar pageOption={pageOptions} page={"items"} />
     </div>
   );
 }

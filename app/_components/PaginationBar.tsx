@@ -14,12 +14,14 @@ import {
 
 interface PaginationBarProps {
   pageOption: PageOption;
+  page: string;
   showEdges?: boolean;
   siblingCount?: number;
 }
 
 export default function PaginationBar({
   pageOption,
+  page,
   showEdges = true,
   siblingCount = 1,
 }: PaginationBarProps) {
@@ -30,7 +32,7 @@ export default function PaginationBar({
   const handlePageChange = (newPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("page", newPage.toString());
-    router.push(`/items?${params.toString()}`);
+    router.push(`/${page}?${params.toString()}`);
   };
 
   const generatePages = () => {

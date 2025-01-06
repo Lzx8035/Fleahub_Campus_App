@@ -48,7 +48,7 @@ export default async function Header() {
     : publicNavigation;
 
   return (
-    <header className="border-b">
+    <header className="border-b sticky top-0 bg-white z-50 transition-shadow duration-300 hover:shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
