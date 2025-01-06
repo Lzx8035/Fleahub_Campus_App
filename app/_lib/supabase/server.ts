@@ -1,6 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-import { Database } from "@/app/_lib/database.types";
+import { Database } from "@/database.types";
 
 // 创建 Supabase 客户端
 export async function createClient() {

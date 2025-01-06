@@ -1,31 +1,12 @@
-import { createServerClient } from "@supabase/ssr";
-import { cookies } from "next/headers";
 import { CategoryCount, Item, User } from "../_types";
+import { createClient as createBrowserClient } from "./supabase/client";
+import { createClient as createServerClient } from "./supabase/server";
 
-async function getSupabaseClient() {
-  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-
-  const cookieStore = await cookies();
-
-  return createServerClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    cookies: {
-      getAll() {
-        return cookieStore.getAll();
-      },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value, options }) =>
-          cookieStore.set(name, value, options)
-        );
-      },
-    },
-  });
-}
+const supabaseClient = createBrowserClient();
+const supabaseServer = await createServerClient();
 
 export async function getUser(id: number): Promise<User | null> {
-  const supabase = await getSupabaseClient();
-
-  const { data: user, error } = await supabase
+  const { data: user, error } = await supabaseClient
     .from("users")
     .select("*")
     .eq("id", id)
@@ -43,10 +24,8 @@ export async function getUser(id: number): Promise<User | null> {
 export async function getMainCategoriesCount(): Promise<
   CategoryCount[] | null
 > {
-  const supabase = await getSupabaseClient();
-
-  const { data: itemCount, error } = await supabase.rpc(
-    "get_main_categories_count"
+  const { data: itemCount, error } = await supabaseClient.rpc(
+    "get_main_categories_count" as never
   );
 
   if (error) {
@@ -62,12 +41,11 @@ export async function getItemsBySearchParams(
   category: string = "all",
   sort: string = "newest"
 ): Promise<{ items: Item[] | null; totalPages: number }> {
-  const supabase = await getSupabaseClient();
   const pageSize = 16;
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
 
-  let query = supabase
+  let query = supabaseClient
     .from("items")
     .select("*", { count: "exact" })
     .eq("status", "available");
@@ -103,11 +81,8 @@ export async function getItemsBySearchParams(
   };
 }
 
-// TODO
 export async function getItemDetail(id: number) {
-  const supabase = await getSupabaseClient();
-
-  const { data: item, error } = await supabase
+  const { data: item, error } = await supabaseClient
     .from("items")
     .select(
       `
@@ -129,4 +104,69 @@ export async function getItemDetail(id: number) {
   }
 
   return item;
+}
+
+export async function getUserWishlist() {
+  const {
+    data: { user },
+    error: userError,
+  } = await supabaseServer.auth.getUser();
+
+  if (!user?.email) {
+    console.error("No authenticated user or email found");
+    return null;
+  }
+
+  if (userError) {
+    console.error("There are some error with user");
+    return null;
+  }
+
+  if (!user) {
+    console.error("No authenticated user found");
+    return null;
+  }
+
+  const { data: existingUser, error: userDbError } = await supabaseServer
+    .from("users")
+    .select("id")
+    .eq("email", user.email)
+    .single();
+
+  if (userDbError) {
+    console.error("There are some error with user database");
+    return null;
+  }
+
+  if (!existingUser) {
+    console.error("User not found in database");
+    return null;
+  }
+
+  const { data: wishlistItems, error } = await supabaseServer
+    .from("wishlist")
+    .select(
+      `
+      id,
+      created_at,
+      item_id,
+      user_id,
+      items:item_id (
+        id,
+        title,
+        price,
+        images,
+        status
+      )
+    `
+    )
+    .eq("user_id", existingUser.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error fetching wishlist:", error);
+    return null;
+  }
+
+  return wishlistItems;
 }

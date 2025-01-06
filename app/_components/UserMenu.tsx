@@ -23,7 +23,7 @@ export default function UserMenu({ user }: { user: User }) {
   const handleSignOut = async () => {
     try {
       await supabase.auth.signOut();
-      router.refresh(); // 刷新页面以更新状态
+      router.refresh();
     } catch (error) {
       console.error("Error signing out:", error);
     }

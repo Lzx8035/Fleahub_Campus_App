@@ -2,6 +2,7 @@ import { createServerClient, CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import type { Database } from "@/database.types";
 
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
@@ -13,11 +14,10 @@ export async function GET(request: NextRequest) {
   }
 
   try {
+    const cookieStore = await cookies();
     const response = NextResponse.redirect(new URL("/", request.url));
 
-    const cookieStore = await cookies();
-
-    const supabase = createServerClient(
+    const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
@@ -40,12 +40,49 @@ export async function GET(request: NextRequest) {
       error,
     } = await supabase.auth.exchangeCodeForSession(code);
 
-    if (error) {
+    if (error || !session?.user.email) {
       console.error("Session exchange error:", error);
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    console.log("Session created successfully:", !!session);
+    // 检查用户是否存在
+    const { data: existingUser, error: userError } = await supabase
+      .from("users")
+      .select()
+      .eq("email", session.user.email)
+      .maybeSingle();
+
+    console.log("User check result:", { existingUser, userError });
+
+    // 只在用户不存在且没有错误时创建新用户
+    if (!existingUser && !userError) {
+      // 获取当前最大 id
+      const { data: maxIdResult } = await supabase
+        .from("users")
+        .select("id")
+        .order("id", { ascending: false })
+        .limit(1)
+        .single();
+
+      const nextId = (maxIdResult?.id || 0) + 1;
+
+      const { error: createError } = await supabase
+        .from("users")
+        .insert({
+          id: nextId,
+          name:
+            session.user.user_metadata.full_name ||
+            session.user.email?.split("@")[0],
+          email: session.user.email,
+          avatar_url: session.user.user_metadata.avatar_url,
+        })
+        .select()
+        .single();
+
+      if (createError) {
+        console.error("Error creating user:", createError);
+      }
+    }
 
     return response;
   } catch (error) {

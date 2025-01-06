@@ -26,7 +26,6 @@ export default async function Header() {
     }
   );
 
-  // 修改 1: 获取 session 和 user
   const [
     {
       data: { user },
@@ -100,7 +99,7 @@ export default async function Header() {
                     {item.name}
                   </Link>
                 ))}
-                {/* 修改 4: 这里也使用 user */}
+
                 {user ? (
                   <UserMenu user={user} />
                 ) : (

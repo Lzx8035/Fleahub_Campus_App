@@ -9,12 +9,16 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
+import { getUserWishlist } from "../_lib/data_service";
 
 export const metadata = {
   title: "Wishlist",
 };
 
-export default function ItemsPage() {
+export default async function ItemsPage() {
+  const WishItems = await getUserWishlist();
+  console.log(WishItems);
+
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
       {/* Items Grid */}
