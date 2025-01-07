@@ -52,7 +52,7 @@ export async function GET(request: NextRequest) {
       .eq("email", session.user.email)
       .maybeSingle();
 
-    console.log("User check result:", { existingUser, userError });
+    // console.log("User check result:", { existingUser, userError });
 
     // 只在用户不存在且没有错误时创建新用户
     if (!existingUser && !userError) {

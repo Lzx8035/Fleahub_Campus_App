@@ -29,20 +29,20 @@ export async function middleware(req: NextRequest) {
     },
   });
 
-  // 获取会话信息
+  // 获取用户信息而不是会话
   const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { pathname } = req.nextUrl;
 
   // 保护需要登录的路由
-  if (["/wishlist", "/account"].includes(pathname) && !session) {
+  if (["/wishlist", "/account"].includes(pathname) && !user) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
   // 如果已登录，访问登录页则重定向到首页
-  if (pathname === "/login" && session) {
+  if (pathname === "/login" && user) {
     return NextResponse.redirect(new URL("/", req.url));
   }
 

@@ -1,12 +1,13 @@
 /* eslint-disable @next/next/no-img-element */
-import { getItemDetail } from "@/app/_lib/data_service";
+import { getItemDetail, getUserWishlist } from "@/app/_lib/data_service";
 import { notFound } from "next/navigation";
-import { Heart, MessageCircle } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import ImageCarousel from "@/app/_components/ImageCarousel";
 import { getImageUrls } from "@/app/_lib/utils";
 import { formatDistanceToNow } from "date-fns";
+import WishlistButton from "@/app/_components/WishlistButton";
 
 export default async function ItemDetailPage({
   params,
@@ -15,6 +16,7 @@ export default async function ItemDetailPage({
 }) {
   const { itemId } = await params;
   const item = await getItemDetail(parseInt(itemId));
+  const wishlistItems = await getUserWishlist();
 
   if (!item) {
     notFound();
@@ -23,18 +25,18 @@ export default async function ItemDetailPage({
   const images = getImageUrls(item.images);
 
   return (
-    <div className="h-[calc(100vh-4rem)] overflow-hidden">
+    <div className="min-h-[calc(100vh-4rem)]">
       <div className="max-w-7xl mx-auto px-4">
-        <div className="h-full flex flex-col lg:flex-row gap-8 pt-8">
-          <div className="w-full lg:w-1/2 flex-shrink-0">
+        <div className="min-h-full flex flex-col sm:flex-row gap-8 pt-8">
+          <div className="w-full sm:w-1/2 flex-shrink-0">
             {images.length > 0 && <ImageCarousel images={images} />}
           </div>
 
-          <div className="w-full lg:w-1/2 overflow-y-auto">
+          <div className="w-full sm:w-1/2">
             <div className="space-y-6 pb-8">
               <div>
-                <h1 className="text-2xl lg:text-3xl font-bold">{item.title}</h1>
-                <p className="text-xl lg:text-2xl font-bold text-[#2a2f33] mt-4">
+                <h1 className="text-2xl sm:text-3xl font-bold">{item.title}</h1>
+                <p className="text-xl sm:text-2xl font-bold text-[#2a2f33] mt-4">
                   ${item.price}
                 </p>
               </div>
@@ -52,7 +54,6 @@ export default async function ItemDetailPage({
                 <div>
                   <p className="font-medium">{item?.seller?.name}</p>
                   <p className="text-sm text-gray-500">
-                    {" "}
                     {formatDistanceToNow(new Date(item.created_at), {
                       addSuffix: true,
                     })}
@@ -67,10 +68,11 @@ export default async function ItemDetailPage({
 
               <div className="flex flex-col sm:flex-row gap-4">
                 <Button className="flex-1">Make Appointment</Button>
-                <Button variant="outline" className="flex-1">
-                  <Heart className="mr-2 h-4 w-4" />
-                  Add to Wishlist
-                </Button>
+                <WishlistButton
+                  itemId={item.id}
+                  initialWishlistItems={wishlistItems || []}
+                  size="default"
+                />
               </div>
 
               <Card className="p-4">

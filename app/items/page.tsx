@@ -1,6 +1,7 @@
 import {
   getItemsBySearchParams,
   getMainCategoriesCount,
+  getUserWishlist,
 } from "../_lib/data_service";
 
 import ItemsGrid from "../_components/ItemsGrid";
@@ -59,6 +60,7 @@ export default async function ItemsPage({
     sort
   );
   const itemsCount = await getMainCategoriesCount();
+  const wishlistItems = await getUserWishlist();
 
   const pageOptions: PageOption = {
     currentPage: page,
@@ -73,7 +75,7 @@ export default async function ItemsPage({
     <div className="max-w-7xl mx-auto px-4 py-8">
       <OptionBar sortOptions={sortOptions} currentSort={sort} />
       <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
-      <ItemsGrid items={items} />
+      <ItemsGrid items={items} initialWishlistItems={wishlistItems || []} />
       <PaginationBar pageOption={pageOptions} page={"items"} />
     </div>
   );

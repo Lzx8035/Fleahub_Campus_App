@@ -9,7 +9,6 @@ export const metadata = {
   description:
     "FleaHubU is a dedicated online marketplace designed specifically for university students to buy and sell second-hand items within their campus community",
 };
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -17,9 +16,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen flex flex-col">
         <Header />
-        <main>{children}</main>
+        <main className="flex-1 mt-0">{children}</main>
       </body>
     </html>
   );

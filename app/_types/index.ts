@@ -29,3 +29,18 @@ export type CategoryCount = {
 // export type ItemDetail = Database["public"]["Tables"]["items"]["Row"] & {
 //   seller: Seller;
 // };
+
+export type WishlistItems = {
+  id: number;
+  created_at: string;
+  item_id: number | null;
+  user_id: number | null;
+  items: {
+    id: number;
+    title: string;
+    price: number;
+    images: string;
+    status: string;
+    description: string;
+  } | null;
+}[];

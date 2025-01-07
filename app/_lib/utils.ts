@@ -1,4 +1,4 @@
-import { Json } from "../_types";
+import { Json, WishlistItems } from "../_types";
 
 export function getImageUrls(imageJson: Json): string[] {
   if (!imageJson) return [];
@@ -17,4 +17,8 @@ export function getImageUrls(imageJson: Json): string[] {
     console.error("Error parsing image JSON:", error);
     return [];
   }
+}
+
+export function isItemInWishlist(itemId: number, wishlistItems: WishlistItems) {
+  return wishlistItems.some((wishItem) => wishItem.items?.id === itemId);
 }
