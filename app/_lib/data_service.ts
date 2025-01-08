@@ -119,17 +119,17 @@ export async function getUserWishlist() {
   } = await supabaseServer.auth.getUser();
 
   if (!user?.email) {
-    console.error("No authenticated user or email found");
+    // console.error("No authenticated user or email found");
     return null;
   }
 
   if (userError) {
-    console.error("There are some error with user");
+    // console.error("There are some error with user");
     return null;
   }
 
   if (!user) {
-    console.error("No authenticated user found");
+    // console.error("No authenticated user found");
     return null;
   }
 

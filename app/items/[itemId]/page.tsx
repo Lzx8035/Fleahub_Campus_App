@@ -8,12 +8,19 @@ import ImageCarousel from "@/app/_components/ImageCarousel";
 import { getImageUrls } from "@/app/_lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import WishlistButton from "@/app/_components/WishlistButton";
+import { createClient } from "@/app/_lib/supabase/server";
 
 export default async function ItemDetailPage({
   params,
 }: {
   params: { itemId: string };
 }) {
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const isLoggedIn = !!session;
+
   const { itemId } = await params;
   const item = await getItemDetail(parseInt(itemId));
   const wishlistItems = await getUserWishlist();
@@ -72,6 +79,7 @@ export default async function ItemDetailPage({
                   itemId={item.id}
                   initialWishlistItems={wishlistItems || []}
                   size="default"
+                  isLoggedIn={isLoggedIn}
                 />
               </div>
 

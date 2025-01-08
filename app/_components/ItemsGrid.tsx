@@ -12,11 +12,13 @@ import WishlistButton from "./WishlistButton";
 interface ItemsGridProps {
   items: Item[];
   initialWishlistItems: WishlistItems;
+  isLoggedIn: boolean;
 }
 
 export default function ItemsGrid({
   items,
   initialWishlistItems,
+  isLoggedIn,
 }: ItemsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
@@ -61,6 +63,7 @@ export default function ItemsGrid({
                     itemId={item.id}
                     initialWishlistItems={initialWishlistItems}
                     size="sm"
+                    isLoggedIn={isLoggedIn}
                   />
                 </div>
               </div>

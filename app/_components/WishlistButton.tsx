@@ -4,17 +4,8 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ToggleWishlistItemAction } from "../_lib/action";
 import type { WishlistItems } from "@/app/_types";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+import { useRouter } from "next/navigation";
+import { CustomAlertDialog } from "./CustomAlertDialog";
 import { isItemInWishlist } from "../_lib/utils";
 
 interface WishlistButtonProps {
@@ -22,8 +13,9 @@ interface WishlistButtonProps {
   initialWishlistItems: WishlistItems;
   className?: string;
   size?: "default" | "sm" | "lg";
-  onlyDelete?: boolean; // 新增属性
-  onDeleteSuccess?: () => void; // 新增回调函数
+  onlyDelete?: boolean;
+  onDeleteSuccess?: () => void;
+  isLoggedIn?: boolean;
 }
 
 export default function WishlistButton({
@@ -33,12 +25,18 @@ export default function WishlistButton({
   size = "sm",
   onlyDelete = false,
   onDeleteSuccess,
+  isLoggedIn = false,
 }: WishlistButtonProps) {
   const [wishlistItems, setWishlistItems] = useState(initialWishlistItems);
   const [isPending, setIsPending] = useState(false);
+  const router = useRouter();
   const inWishlist = isItemInWishlist(itemId, wishlistItems);
 
   const handleWishlistToggle = async () => {
+    if (!isLoggedIn && !onlyDelete) {
+      return;
+    }
+
     try {
       setIsPending(true);
       const isAdded = await ToggleWishlistItemAction(itemId);
@@ -47,7 +45,7 @@ export default function WishlistButton({
         setWishlistItems((prev) =>
           prev.filter((item) => item.item_id !== itemId)
         );
-        onDeleteSuccess?.(); // 调用删除成功的回调
+        onDeleteSuccess?.();
       } else if (!onlyDelete) {
         setWishlistItems((prev) => [
           ...prev,
@@ -76,32 +74,30 @@ export default function WishlistButton({
 
   if (onlyDelete) {
     return (
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
-          <Button
-            variant="default"
-            size={size}
-            className={`w-auto ${className}`}
-            disabled={isPending}
-          >
-            {isPending ? "Loading..." : "Delete from Wishlist"}
-          </Button>
-        </AlertDialogTrigger>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will remove the item from your wishlist.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleWishlistToggle}>
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CustomAlertDialog
+        triggerText={isPending ? "Loading..." : "Delete from Wishlist"}
+        title="Are you sure?"
+        description="This will remove the item from your wishlist."
+        confirmText="Delete"
+        onConfirm={handleWishlistToggle}
+        buttonClassName={`w-auto ${className}`}
+        buttonSize={size}
+        disabled={isPending}
+      />
+    );
+  }
+
+  if (!isLoggedIn) {
+    return (
+      <CustomAlertDialog
+        triggerText="Add to Wishlist"
+        title="Login Required"
+        description="Please login to add items to your wishlist."
+        confirmText="Login"
+        onConfirm={() => router.push("/login")}
+        buttonClassName={`w-full ${className}`}
+        buttonSize={size}
+      />
     );
   }
 

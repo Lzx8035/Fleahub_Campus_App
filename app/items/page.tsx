@@ -10,6 +10,7 @@ import OptionBar from "../_components/OptionBar";
 import PaginationBar from "../_components/PaginationBar";
 
 import { SortOption, PageOption } from "../_types";
+import { createClient } from "../_lib/supabase/server";
 
 export const metadata = {
   title: "Items",
@@ -42,6 +43,12 @@ export default async function ItemsPage({
 }: {
   searchParams: SearchParams;
 }) {
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+  const isLoggedIn = !!session;
+
   const awaitedSearchParams = await searchParams;
 
   function getParams() {
@@ -75,7 +82,11 @@ export default async function ItemsPage({
     <div className="max-w-7xl mx-auto px-4 py-8">
       <OptionBar sortOptions={sortOptions} currentSort={sort} />
       <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
-      <ItemsGrid items={items} initialWishlistItems={wishlistItems || []} />
+      <ItemsGrid
+        items={items}
+        initialWishlistItems={wishlistItems || []}
+        isLoggedIn={isLoggedIn}
+      />
       <PaginationBar pageOption={pageOptions} page={"items"} />
     </div>
   );
