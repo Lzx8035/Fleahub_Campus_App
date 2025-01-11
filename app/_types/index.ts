@@ -5,7 +5,7 @@ export type Item = Database["public"]["Tables"]["items"]["Row"];
 export type Json = Database["public"]["Tables"]["items"]["Row"]["images"];
 
 export interface SortOption {
-  value: "newest" | "price-low" | "price-high";
+  value: string;
   label: string;
 }
 

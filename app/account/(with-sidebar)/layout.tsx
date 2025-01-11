@@ -1,4 +1,4 @@
-import SideNav from "../_components/SideNav";
+import SideNav from "@/app/_components/SideNav";
 
 export default function AccountLayout({
   children,

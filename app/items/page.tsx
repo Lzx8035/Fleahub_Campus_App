@@ -28,16 +28,6 @@ interface SearchParams {
   sort?: string;
 }
 
-////// reference
-// const categories = {
-//   'books': ['textbooks', 'academic_books', 'fiction', 'magazines', 'study_guides', 'research_papers'],
-//   'electronics': ['laptops', 'smartphones', 'tablets', 'headphones', 'monitors', 'computer_accessories'],
-//   'furniture': ['chairs', 'desks', 'shelves', 'lamps', 'storage', 'bed_accessories'],
-//   'clothing': ['winter_wear', 'summer_wear', 'formal_wear', 'shoes', 'bags', 'accessories'],
-//   'supplies': ['stationery', 'art_supplies', 'lab_equipment', 'sports_equipment', 'kitchen_supplies', 'cleaning_supplies'],
-//   'others': ['collectibles', 'instruments', 'board_games', 'bike', 'decorations']
-// };
-
 export default async function ItemsPage({
   searchParams,
 }: {
@@ -69,7 +59,7 @@ export default async function ItemsPage({
   const itemsCount = await getMainCategoriesCount();
   const wishlistItems = await getUserWishlist();
 
-  const pageOptions: PageOption = {
+  const pageOption: PageOption = {
     currentPage: page,
     totalPages: totalPages,
   };
@@ -80,14 +70,14 @@ export default async function ItemsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <OptionBar sortOptions={sortOptions} currentSort={sort} />
+      <OptionBar sortOptions={sortOptions} currentSort={sort} page="items" />
       <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
       <ItemsGrid
         items={items}
         initialWishlistItems={wishlistItems || []}
         isLoggedIn={isLoggedIn}
       />
-      <PaginationBar pageOption={pageOptions} page={"items"} />
+      <PaginationBar pageOption={pageOption} page={"items"} />
     </div>
   );
 }

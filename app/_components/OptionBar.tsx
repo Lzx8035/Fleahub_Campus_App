@@ -17,9 +17,10 @@ import { SortOption } from "../_types";
 interface SortOptionProps {
   sortOptions: SortOption[];
   currentSort: string;
+  page: string;
 }
 
-export default function OptionBar({ sortOptions }: SortOptionProps) {
+export default function OptionBar({ sortOptions, page }: SortOptionProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -27,11 +28,11 @@ export default function OptionBar({ sortOptions }: SortOptionProps) {
     const params = new URLSearchParams(searchParams.toString());
     params.set("sort", newSort);
     params.set("page", "1");
-    router.push(`/items?${params.toString()}`);
+    router.push(`/${page}?${params.toString()}`);
   };
 
   return (
-    <div className="flex flex-col sm:flex-row gap-12 mb-8">
+    <div className="flex flex-col sm:flex-row gap-12">
       <div className="relative flex-1">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
         <Input placeholder="Search items..." className="pl-10" />

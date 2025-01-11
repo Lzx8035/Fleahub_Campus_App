@@ -7,8 +7,8 @@ import { Button } from "@/components/ui/button";
 
 const sideNavItems = [
   { name: "Personal Info", href: "/account" },
-  { name: "Orders", href: "/account/orders" },
   { name: "My Items", href: "/account/my_items" },
+  { name: "My Appointments", href: "/account/my_appointments" },
   { name: "Settings", href: "/account/settings" },
 ];
 
