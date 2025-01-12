@@ -73,7 +73,7 @@ export default function MyItemsPage() {
         <Button
           size="lg"
           variant="outline"
-          className="bg-indigo-500 hover:bg-indigo-600 text-white w-full sm:w-auto"
+          className="bg-indigo-500 hover:bg-indigo-600 text-white hover:text-white w-full sm:w-auto"
           asChild
         >
           <Link href="/account/my_items/edit">

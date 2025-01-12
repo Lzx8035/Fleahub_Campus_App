@@ -24,7 +24,7 @@ export default function ItemsGrid({
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
       {items.map((item) => {
         return (
-          <Card key={item.id} className="w-full">
+          <Card key={item.id} className="w-full  bg-slate-50">
             <div className="p-4 flex flex-col h-full">
               <div className="aspect-square bg-gray-100 rounded-md mb-2 overflow-hidden flex-shrink-0">
                 {getImageUrls(item.images)[0] && (

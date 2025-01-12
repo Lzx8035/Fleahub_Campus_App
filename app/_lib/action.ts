@@ -87,3 +87,7 @@ export async function ToggleWishlistItemAction(itemId: number) {
     revalidatePath("/wishlist");
   }
 }
+
+export async function Login() {}
+
+export async function Logout() {}

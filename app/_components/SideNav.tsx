@@ -17,12 +17,12 @@ export default function SideNav() {
 
   return (
     <aside className="w-64 shrink-0">
-      <nav className="space-y-2">
+      <nav className="space-y-2 flex flex-col gap-2">
         {sideNavItems.map((item) => (
           <Button
             key={item.name}
             variant="ghost"
-            className={`w-full justify-start ${
+            className={`w-full justify-start text-base ${
               pathname === item.href ? "bg-slate-200" : ""
             }`}
             asChild

@@ -9,6 +9,7 @@ import { getImageUrls } from "@/app/_lib/utils";
 import { formatDistanceToNow } from "date-fns";
 import WishlistButton from "@/app/_components/WishlistButton";
 import { createClient } from "@/app/_lib/supabase/server";
+import Link from "next/link";
 
 export default async function ItemDetailPage({
   params,
@@ -74,7 +75,11 @@ export default async function ItemDetailPage({
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <Button className="flex-1">Make Appointment</Button>
+                <Button className="flex-1" asChild>
+                  <Link href="/account/my_appointments/edit">
+                    Make Appointment
+                  </Link>
+                </Button>
                 <WishlistButton
                   itemId={item.id}
                   initialWishlistItems={wishlistItems || []}

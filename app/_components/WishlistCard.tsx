@@ -17,7 +17,7 @@ interface WishlistCardProps {
 
 export default function WishlistCard({ item, wishItems }: WishlistCardProps) {
   return (
-    <Card className="flex flex-row w-full">
+    <Card className="flex flex-row w-full  bg-slate-50">
       <div className="w-48 min-w-[12rem] p-4">
         <div className="relative aspect-square bg-gray-100 rounded-md overflow-hidden">
           <Image
