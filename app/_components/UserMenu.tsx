@@ -8,24 +8,20 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { createBrowserClient } from "@supabase/ssr";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
+import { signOut } from "@/app/_lib/auth";
+import { CustomAlertDialog } from "./CustomAlertDialog";
+import { LogOut } from "lucide-react";
 
 export default function UserMenu({ user }: { user: User }) {
   const router = useRouter();
 
-  const supabase = createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-
   const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
+    const { error } = await signOut();
+    if (!error) {
       router.refresh();
-    } catch (error) {
-      console.error("Error signing out:", error);
     }
   };
 
@@ -46,11 +42,32 @@ export default function UserMenu({ user }: { user: User }) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-48">
         <DropdownMenuItem asChild>
-          {/* <Link href="/account" className="w-full">
-            Account Settings
-          </Link> */}
+          <Link href="/account/my_items/edit" className="w-full">
+            Add new items to sell
+          </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleSignOut}>Sign Out</DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/account/my_items" className="w-full">
+            My items
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/account/my_appointments" className="w-full">
+            My appointments
+          </Link>
+        </DropdownMenuItem>
+
+        <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+          <CustomAlertDialog
+            triggerText="Sign Out"
+            title="Sign Out"
+            description="Are you sure you want to sign out?"
+            onConfirm={handleSignOut}
+            variant="ghost"
+            buttonClassName="w-full justify-start text-sm"
+            icon={<LogOut className="h-4 w-4" />}
+          />
+        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );

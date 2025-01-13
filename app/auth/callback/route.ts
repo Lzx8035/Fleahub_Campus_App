@@ -7,6 +7,7 @@ import type { Database } from "@/database.types";
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const redirect = requestUrl.searchParams.get("redirect");
 
   if (!code) {
     console.error("No code in callback");
@@ -15,7 +16,9 @@ export async function GET(request: NextRequest) {
 
   try {
     const cookieStore = await cookies();
-    const response = NextResponse.redirect(new URL("/", request.url));
+    const response = NextResponse.redirect(
+      new URL(redirect || "/", request.url)
+    );
 
     const supabase = createServerClient<Database>(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,

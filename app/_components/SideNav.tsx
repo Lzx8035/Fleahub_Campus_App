@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-
+import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { CustomAlertDialog } from "./CustomAlertDialog";
+import { signOut } from "../_lib/auth";
+import { LogOut } from "lucide-react";
 
 const sideNavItems = [
   { name: "Personal Info", href: "/account" },
@@ -14,6 +16,14 @@ const sideNavItems = [
 
 export default function SideNav() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleSignOut = async () => {
+    const { error } = await signOut();
+    if (!error) {
+      router.refresh();
+    }
+  };
 
   return (
     <aside className="w-64 shrink-0">
@@ -30,6 +40,18 @@ export default function SideNav() {
             <Link href={item.href}>{item.name}</Link>
           </Button>
         ))}
+
+        <div>
+          <CustomAlertDialog
+            triggerText="Sign Out"
+            title="Sign Out"
+            description="Are you sure you want to sign out?"
+            onConfirm={handleSignOut}
+            variant="ghost"
+            buttonClassName="w-full justify-start text-base"
+            icon={<LogOut className="h-6 w-6" />}
+          />
+        </div>
       </nav>
     </aside>
   );

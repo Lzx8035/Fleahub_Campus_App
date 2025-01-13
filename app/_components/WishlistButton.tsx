@@ -1,10 +1,11 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import type { WishlistItems } from "@/app/_types";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+
 import { ToggleWishlistItemAction } from "../_lib/action";
-import type { WishlistItems } from "@/app/_types";
-import { useRouter } from "next/navigation";
 import { CustomAlertDialog } from "./CustomAlertDialog";
 import { isItemInWishlist } from "../_lib/utils";
 
@@ -94,7 +95,11 @@ export default function WishlistButton({
         title="Login Required"
         description="Please login to add items to your wishlist."
         confirmText="Login"
-        onConfirm={() => router.push("/login")}
+        onConfirm={() =>
+          router.push(
+            `/login?redirect=${encodeURIComponent(window.location.pathname)}`
+          )
+        }
         buttonClassName={`w-full ${className}`}
         buttonSize={size}
       />

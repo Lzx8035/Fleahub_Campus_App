@@ -8,8 +8,12 @@ export default function HomePage() {
         Campus Shopping Made Easy
       </h1>
 
-      <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl">
+      <p className="text-lg md:text-xl text-gray-600 mb-8 mt-8 max-w-2xl">
         Buy and sell second-hand items safely within your campus community
+      </p>
+
+      <p className="text-lg md:text-xl text-gray-600 mb-16 max-w-2xl">
+        Save Money from today
       </p>
 
       <div className="space-x-4">

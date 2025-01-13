@@ -20,10 +20,11 @@ interface CustomAlertDialogProps {
   cancelText?: string;
   confirmText?: string;
   onConfirm: () => void;
-  variant?: "default" | "secondary" | "destructive";
+  variant?: "default" | "secondary" | "destructive" | "ghost";
   buttonClassName?: string;
   buttonSize?: "default" | "sm" | "lg";
   disabled?: boolean;
+  icon?: React.ReactNode;
 }
 
 export function CustomAlertDialog({
@@ -37,6 +38,7 @@ export function CustomAlertDialog({
   buttonClassName = "",
   buttonSize = "default",
   disabled = false,
+  icon,
 }: CustomAlertDialogProps) {
   return (
     <AlertDialog>
@@ -47,6 +49,7 @@ export function CustomAlertDialog({
           className={buttonClassName}
           disabled={disabled}
         >
+          {icon && <span className="mr-1">{icon}</span>}
           {triggerText}
         </Button>
       </AlertDialogTrigger>
