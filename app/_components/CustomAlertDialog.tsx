@@ -1,15 +1,15 @@
 "use client";
 
+import { useState } from "react";
 import {
   AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
+  AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 
@@ -19,7 +19,7 @@ interface CustomAlertDialogProps {
   description: string;
   cancelText?: string;
   confirmText?: string;
-  onConfirm: () => void;
+  onConfirm: (() => void) | (() => Promise<void>);
   variant?: "default" | "secondary" | "destructive" | "ghost";
   buttonClassName?: string;
   buttonSize?: "default" | "sm" | "lg";
@@ -40,14 +40,27 @@ export function CustomAlertDialog({
   disabled = false,
   icon,
 }: CustomAlertDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleConfirm = async () => {
+    setIsLoading(true);
+    try {
+      await Promise.resolve(onConfirm());
+    } finally {
+      setIsLoading(false);
+      setOpen(false);
+    }
+  };
+
   return (
-    <AlertDialog>
+    <AlertDialog open={open} onOpenChange={setOpen}>
       <AlertDialogTrigger asChild>
         <Button
           variant={variant}
           size={buttonSize}
           className={buttonClassName}
-          disabled={disabled}
+          disabled={disabled || isLoading}
         >
           {icon && <span className="mr-1">{icon}</span>}
           {triggerText}
@@ -59,10 +72,16 @@ export function CustomAlertDialog({
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>{cancelText}</AlertDialogCancel>
-          <AlertDialogAction onClick={onConfirm}>
-            {confirmText}
-          </AlertDialogAction>
+          <AlertDialogCancel disabled={isLoading}>
+            {cancelText}
+          </AlertDialogCancel>
+          <Button
+            variant="default"
+            onClick={handleConfirm}
+            disabled={isLoading}
+          >
+            {isLoading ? "Loading..." : confirmText}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

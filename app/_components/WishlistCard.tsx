@@ -82,9 +82,6 @@ export default function WishlistCard({ item, wishItems }: WishlistCardProps) {
             initialWishlistItems={wishItems}
             onlyDelete
             size="default"
-            onDeleteSuccess={() => {
-              window.location.reload();
-            }}
           />
         </div>
       </div>

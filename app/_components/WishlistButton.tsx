@@ -5,6 +5,7 @@ import type { WishlistItems } from "@/app/_types";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
+import { toast } from "sonner";
 import { ToggleWishlistItemAction } from "../_lib/action";
 import { CustomAlertDialog } from "./CustomAlertDialog";
 import { isItemInWishlist } from "../_lib/utils";
@@ -15,7 +16,6 @@ interface WishlistButtonProps {
   className?: string;
   size?: "default" | "sm" | "lg";
   onlyDelete?: boolean;
-  onDeleteSuccess?: () => void;
   isLoggedIn?: boolean;
 }
 
@@ -25,7 +25,6 @@ export default function WishlistButton({
   className = "",
   size = "sm",
   onlyDelete = false,
-  onDeleteSuccess,
   isLoggedIn = false,
 }: WishlistButtonProps) {
   const [wishlistItems, setWishlistItems] = useState(initialWishlistItems);
@@ -38,15 +37,16 @@ export default function WishlistButton({
       return;
     }
 
+    const previousItems = wishlistItems;
+
     try {
       setIsPending(true);
-      const isAdded = await ToggleWishlistItemAction(itemId);
 
-      if (!isAdded) {
+      // optimistic update
+      if (inWishlist || onlyDelete) {
         setWishlistItems((prev) =>
           prev.filter((item) => item.item_id !== itemId)
         );
-        onDeleteSuccess?.();
       } else if (!onlyDelete) {
         setWishlistItems((prev) => [
           ...prev,
@@ -66,8 +66,18 @@ export default function WishlistButton({
           },
         ]);
       }
+
+      const isAdded = await ToggleWishlistItemAction(itemId);
+
+      if (!isAdded) {
+        toast.success("Item removed from wishlist");
+      } else if (!onlyDelete) {
+        toast.success("Item added to wishlist");
+      }
     } catch (error) {
       console.error("Failed to toggle wishlist status:", error);
+      setWishlistItems(previousItems);
+      toast.error("Failed to update wishlist");
     } finally {
       setIsPending(false);
     }
