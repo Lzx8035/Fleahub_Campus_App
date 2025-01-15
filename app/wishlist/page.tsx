@@ -11,7 +11,7 @@ export const metadata = {
 
 const ITEMS_PER_PAGE = 4; // 每页显示的项目数量
 // app/wishlist/page.tsx
-export default async function ItemsPage({
+export default async function WishlistPage({
   searchParams,
 }: {
   searchParams: { page?: string };

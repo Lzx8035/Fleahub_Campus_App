@@ -17,7 +17,7 @@ export type Database = {
           item_id: number | null
           meeting_location: string | null
           meeting_time: string | null
-          status: string | null
+          status: Json | null
         }
         Insert: {
           buyer_id?: number | null
@@ -26,7 +26,7 @@ export type Database = {
           item_id?: number | null
           meeting_location?: string | null
           meeting_time?: string | null
-          status?: string | null
+          status?: Json | null
         }
         Update: {
           buyer_id?: number | null
@@ -35,7 +35,7 @@ export type Database = {
           item_id?: number | null
           meeting_location?: string | null
           meeting_time?: string | null
-          status?: string | null
+          status?: Json | null
         }
         Relationships: [
           {

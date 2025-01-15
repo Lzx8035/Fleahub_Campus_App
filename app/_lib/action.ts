@@ -2,6 +2,10 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 
+/////////////////////////////////////////////////////////////////
+// Wishlist Button
+/////////////////////////////////////////////////////////////////
+
 export async function ToggleWishlistItemAction(itemId: number) {
   const supabase = await createClient();
 
@@ -88,6 +92,23 @@ export async function ToggleWishlistItemAction(itemId: number) {
   }
 }
 
-export async function Login() {}
+/////////////////////////////////////////////////////////////////
+// Account Page TODO
+/////////////////////////////////////////////////////////////////
 
-export async function Logout() {}
+// My Items
+
+export async function EditOrCreateMyItemAction() {}
+
+export async function toggleReserveItemAction() {}
+
+export async function deleteMyItemAction() {}
+
+// My Appointments
+
+export async function EditOrCreateMyAppointmentAction() {}
+
+export async function CancelAppointment() {}
+
+// ??? seller and buyer both agreed?
+export async function CompleteAppointment() {}

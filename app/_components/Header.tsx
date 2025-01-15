@@ -1,36 +1,12 @@
-import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { cookies } from "next/headers";
-import { createServerClient } from "@supabase/ssr";
+import { Menu } from "lucide-react";
+import Link from "next/link";
+import { getSupabaseUserData } from "../_lib/data_service";
 import UserMenu from "./UserMenu";
 
 export default async function Header() {
-  const cookieStore = await cookies();
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return cookieStore.getAll();
-        },
-        setAll(cookiesToSet) {
-          cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
-          );
-        },
-      },
-    }
-  );
-
-  const [
-    {
-      data: { user },
-    },
-  ] = await Promise.all([supabase.auth.getUser()]);
+  const userData = await getSupabaseUserData();
 
   const publicNavigation = [
     { name: "Home", href: "/" },
@@ -43,7 +19,7 @@ export default async function Header() {
   ];
 
   // 修改 2: 使用 user 来判断是否登录
-  const navigation = user
+  const navigation = userData
     ? [...publicNavigation, ...protectedNavigation]
     : publicNavigation;
 
@@ -72,8 +48,8 @@ export default async function Header() {
               </Link>
             ))}
             {/* 修改 3: 传递 user 而不是 session.user */}
-            {user ? (
-              <UserMenu user={user} />
+            {userData ? (
+              <UserMenu userData={userData} />
             ) : (
               <Button asChild>
                 <Link href="/login">Login</Link>
@@ -100,8 +76,8 @@ export default async function Header() {
                   </Link>
                 ))}
 
-                {user ? (
-                  <UserMenu user={user} />
+                {userData ? (
+                  <UserMenu userData={userData} />
                 ) : (
                   <Button asChild>
                     <Link href="/login">Login</Link>
