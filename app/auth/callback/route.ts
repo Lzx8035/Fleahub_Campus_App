@@ -48,18 +48,64 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/login", request.url));
     }
 
-    // 检查用户是否存在
     const { data: existingUser, error: userError } = await supabase
       .from("users")
       .select()
       .eq("email", session.user.email)
       .maybeSingle();
 
-    // console.log("User check result:", { existingUser, userError });
+    let avatarUrl = session.user.user_metadata.avatar_url;
 
-    // 只在用户不存在且没有错误时创建新用户
+    if (avatarUrl) {
+      try {
+        if (existingUser?.avatar_url) {
+          const oldAvatarPath = existingUser.avatar_url.split("/").pop();
+          console.log(oldAvatarPath);
+          if (oldAvatarPath) {
+            const { error: deleteError } = await supabase.storage
+              .from("avatars")
+              .remove([oldAvatarPath]);
+
+            if (deleteError) {
+              console.error("Error deleting old avatar:", deleteError);
+            }
+          }
+        }
+
+        const response = await fetch(avatarUrl);
+        const blob = await response.blob();
+
+        const fileName = `avatar_${session.user.id}_${Date.now()}.jpg`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("avatars")
+          .upload(fileName, blob, {
+            contentType: "image/jpeg",
+            upsert: true,
+          });
+
+        if (!uploadError) {
+          const {
+            data: { publicUrl },
+          } = supabase.storage.from("avatars").getPublicUrl(fileName);
+
+          avatarUrl = publicUrl;
+
+          if (existingUser) {
+            await supabase
+              .from("users")
+              .update({ avatar_url: avatarUrl })
+              .eq("email", session.user.email);
+          }
+        } else {
+          console.error("Error uploading avatar:", uploadError);
+        }
+      } catch (error) {
+        console.error("Error processing avatar:", error);
+      }
+    }
+
     if (!existingUser && !userError) {
-      // 获取当前最大 id
       const { data: maxIdResult } = await supabase
         .from("users")
         .select("id")
@@ -77,7 +123,8 @@ export async function GET(request: NextRequest) {
             session.user.user_metadata.full_name ||
             session.user.email?.split("@")[0],
           email: session.user.email,
-          avatar_url: session.user.user_metadata.avatar_url,
+          avatar_url: avatarUrl,
+          auth_id: session.user.id,
         })
         .select()
         .single();

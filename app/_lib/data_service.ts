@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { CategoryCount, Item } from "../_types";
 // Public
 import { createClient as createBrowserClient } from "./supabase/client";
@@ -236,6 +235,8 @@ export async function getDashboardStats(userId: number) {
   };
 }
 
+// My Items
+
 export async function getSupabaseUserData() {
   const supabase = await createServerClient();
 
@@ -244,7 +245,7 @@ export async function getSupabaseUserData() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    return null;
   }
 
   const { data: userData, error: userError } = await supabase
@@ -260,8 +261,6 @@ export async function getSupabaseUserData() {
 
   return userData;
 }
-
-// My Items
 
 export async function getMyItems(userId: number) {
   const supabase = await createServerClient();

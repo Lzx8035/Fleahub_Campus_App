@@ -1,4 +1,3 @@
-// components/WishlistCard.tsx
 "use client";
 
 import { Card, CardTitle } from "@/components/ui/card";

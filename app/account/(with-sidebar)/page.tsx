@@ -4,6 +4,7 @@ import {
 } from "@/app/_lib/data_service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import StatusBar from "@/app/_components/StatusBar";
+import { redirect } from "next/navigation";
 
 export const metadata = {
   title: "Account",
@@ -11,6 +12,10 @@ export const metadata = {
 
 export default async function AccountPage() {
   const userData = await getSupabaseUserData();
+
+  if (!userData) {
+    redirect("/auth/login");
+  }
 
   const stats = await getDashboardStats(userData.id);
 
@@ -45,7 +50,6 @@ export default async function AccountPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* User Profile Section */}
       <div className="flex items-center gap-4 mb-8">
         <Avatar className="w-16 h-16">
           <AvatarImage
