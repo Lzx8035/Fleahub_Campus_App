@@ -1,7 +1,12 @@
 import React from "react";
+import Link from "next/link";
+import Image from "next/image";
+import { formatDistanceToNow, format } from "date-fns";
+
+import { MyAppointment } from "@/app/_types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
+import { Badge } from "@/components/ui/badge";
 import {
   Check,
   X,
@@ -10,51 +15,45 @@ import {
   MapPin,
   User,
   Pencil,
+  Handshake,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import Link from "next/link";
+import { getImageUrls } from "../_lib/utils";
 
 interface AppointmentCardProps {
-  appointment: {
-    id: string;
-    title: string;
-    description: string;
-    image: string;
-    price: number;
-    date: string;
-    meetTime: string;
-    location: string;
-    partnerId: string;
-    partnerName: string;
-    status: "pending" | "completed" | "cancelled";
-    buyer_id: number;
-    current_user_id: number;
-  };
+  appointment: MyAppointment;
+  userId: number;
 }
 
 const statusStyles = {
   pending: "bg-amber-500 ",
   completed: "bg-indigo-500 ",
-  cancelled: "bg-gray-400 ",
+  canceled: "bg-gray-500 ",
 };
 
 const roleStyles = {
   buy: "bg-pink-400",
-  sell: "bg-rose-400",
+  sell: "bg-emerald-400",
 };
 
-export default function AppointmentCard({ appointment }: AppointmentCardProps) {
-  const isCurrentUserBuyer =
-    appointment.buyer_id === appointment.current_user_id;
+export default function AppointmentCard({
+  appointment,
+  userId,
+}: AppointmentCardProps) {
+  const isCurrentUserBuyer = appointment.buyer_id === userId;
 
   return (
     <Card className="flex p-4 gap-4 bg-slate-50">
       <div className="w-40 h-40 relative rounded-lg overflow-hidden flex-shrink-0">
         <Image
-          src={appointment.image || "/api/placeholder/400/400"}
-          alt={appointment.title}
+          src={
+            getImageUrls(appointment.items.images)[0] ||
+            "/api/placeholder/400/400"
+          }
+          alt={appointment.items.title}
           fill
+          priority
           className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
 
@@ -62,7 +61,9 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
         <div className="space-y-3">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-semibold text-lg">{appointment.title}</h3>
+              <h3 className="font-semibold text-lg">
+                {appointment.items.title}
+              </h3>
               <p className="text-sm text-slate-500">
                 Order ID: {appointment.id}
               </p>
@@ -78,42 +79,48 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
               </Badge>
               <Badge
                 variant="secondary"
-                className={`${statusStyles[appointment.status]} text-white`}
+                className={`${
+                  statusStyles[appointment.status.overall_status]
+                } text-white`}
               >
-                {appointment.status.charAt(0).toUpperCase() +
-                  appointment.status.slice(1)}
+                {appointment.status!.overall_status.charAt(0).toUpperCase() +
+                  appointment.status!.overall_status.slice(1)}
               </Badge>
             </div>
           </div>
 
           <div>
             <p className="text-xl font-bold text-slate-900">
-              ${appointment.price.toLocaleString()}
-            </p>
-            <p className="text-sm text-slate-600 line-clamp-2 mt-1">
-              {appointment.description}
+              ${appointment.items.price}
             </p>
           </div>
 
           <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
             <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-slate-400" />
-              <span>{appointment.meetTime}</span>
+              <Handshake className="w-4 h-4 text-slate-400" />
+              <span>
+                Ordered at: {formatDistanceToNow(appointment.created_at)} ago
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-slate-400" />
-              <span>{appointment.location}</span>
+              <span>{appointment.meeting_location}</span>
             </div>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />
               <span>
-                {isCurrentUserBuyer ? "Seller" : "Buyer"} ID:{" "}
-                {appointment.partnerId}
+                {isCurrentUserBuyer ? "Seller" : "Buyer"} Name:{" "}
+                {isCurrentUserBuyer
+                  ? appointment.seller.name
+                  : appointment.buyer.name}
               </span>
             </div>
             <div className="flex items-center gap-2">
               <Clock className="w-4 h-4 text-slate-400" />
-              <span>Date: {appointment.date}</span>
+              <span>
+                Date:{" "}
+                {format(new Date(appointment.meeting_time), "M/d/yy, h:mm a")}
+              </span>
             </div>
           </div>
         </div>
@@ -131,7 +138,7 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
           variant="outline"
           size="sm"
           className="w-24"
-          disabled={appointment.status !== "pending"}
+          disabled={appointment.status.overall_status !== "pending"}
         >
           <Check className="w-4 h-4 mr-2" />
           Complete
@@ -141,7 +148,7 @@ export default function AppointmentCard({ appointment }: AppointmentCardProps) {
           variant="outline"
           size="sm"
           className="w-24"
-          disabled={appointment.status !== "pending"}
+          disabled={appointment.status.overall_status !== "pending"}
         >
           <X className="w-4 h-4 mr-2" />
           Cancel

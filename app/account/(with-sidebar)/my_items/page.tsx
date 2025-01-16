@@ -1,74 +1,66 @@
-import React from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OptionBar from "@/app/_components/OptionBar";
 import PaginationBar from "@/app/_components/PaginationBar";
 import MyItemCard from "@/app/_components/MyItemCard";
 import Link from "next/link";
-import { PageOption } from "@/app/_types";
+import { getMyItems, getSupabaseUserData } from "@/app/_lib/data_service";
+import {
+  createMyItemsSortConfig,
+  getClientPagination,
+  getClientSort,
+} from "@/app/_lib/utils";
+import { MyItem, SearchParams } from "@/app/_types";
 
-export default function MyItemsPage() {
-  const sampleItems = [
-    {
-      id: 1,
-      title: "Vintage Camera",
-      price: 299.99,
-      status: "available",
-      image: "/api/placeholder/400/400",
-    },
-    {
-      id: 2,
-      title: "Classic Watch",
-      price: 599.99,
-      status: "reserved",
-      image: "/api/placeholder/400/400",
-    },
-    {
-      id: 3,
-      title: "Antique Vase",
-      price: 199.99,
-      status: "sold",
-      image: "/api/placeholder/400/400",
-    },
-    {
-      id: 4,
-      title: "Vintage Record Player",
-      price: 449.99,
-      status: "available",
-      image: "/api/placeholder/400/400",
-    },
-    {
-      id: 5,
-      title: "Retro Phone",
-      price: 159.99,
-      status: "available",
-      image: "/api/placeholder/400/400",
-    },
-  ] as const;
+const sortOptions = [
+  { label: "All Items", value: "all" },
+  { label: "Available", value: "available" },
+  { label: "Sold", value: "sold" },
+  { label: "Reserved", value: "reserved" },
+  { label: "Newest", value: "newest" },
+  { label: "Oldest", value: "oldest" },
+];
 
-  const sortOptions = [
-    { label: "All Items", value: "all" },
-    { label: "Available", value: "available" },
-    { label: "Sold", value: "sold" },
-    { label: "Reserved", value: "reserved" },
-  ];
+export default async function MyItemsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const userData = await getSupabaseUserData();
+  const myItems = await getMyItems(userData!.id!);
+  const { sort } = await searchParams;
+  const currentSort = sort || "all";
 
-  const itemsPerPage = 4;
+  const sortedItems = getClientSort<MyItem>({
+    items: myItems,
+    currentSort,
+    sortConfig: createMyItemsSortConfig(),
+  });
 
-  const pageOption: PageOption = {
-    currentPage: 1,
-    totalPages: 2,
-  };
+  const { paginatedItems, pageOption, hasMultiplePages } =
+    await getClientPagination<MyItem>({
+      searchParams,
+      items: sortedItems,
+    });
 
-  const startIndex = (pageOption.currentPage - 1) * itemsPerPage;
-  const displayedItems = sampleItems.slice(
-    startIndex,
-    startIndex + itemsPerPage
-  );
+  if (!myItems?.length) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">No items yet</h2>
+          <p className="text-gray-500 mb-4">
+            Start selling by adding your first item!
+          </p>
+          <Button asChild>
+            <Link href="/account/my_items/edit">Add New Item</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
-      {/* Top Section */}
       <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
         <Button
           size="lg"
@@ -81,25 +73,22 @@ export default function MyItemsPage() {
             Add New Item
           </Link>
         </Button>
-
-        <div className="w-full sm:w-auto sm:flex-1 sm:max-w-2xl sm:ml-6 ">
+        <div className="w-full sm:w-auto sm:flex-1 sm:max-w-2xl sm:ml-6">
           <OptionBar
             sortOptions={sortOptions}
-            currentSort="all"
-            page={"account/my_items"}
+            currentSort={currentSort}
+            page="account/my_items"
           />
         </div>
       </div>
 
-      {/* Items List */}
       <div className="space-y-4">
-        {displayedItems.map((item) => (
-          <MyItemCard key={item.id} item={item} />
+        {paginatedItems.map((item) => (
+          <MyItemCard key={item.id} myItem={item} />
         ))}
       </div>
 
-      {/* Pagination */}
-      {sampleItems.length > 4 && (
+      {hasMultiplePages && (
         <div className="mt-8 flex justify-center">
           <PaginationBar pageOption={pageOption} page="account/my_items" />
         </div>

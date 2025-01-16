@@ -11,31 +11,34 @@ export type Database = {
     Tables: {
       appointments: {
         Row: {
-          buyer_id: number | null
+          buyer_id: number
           created_at: string
           id: number
-          item_id: number | null
-          meeting_location: string | null
-          meeting_time: string | null
-          status: Json | null
+          item_id: number
+          meeting_location: string
+          meeting_time: string
+          seller_id: number
+          status: Json
         }
         Insert: {
-          buyer_id?: number | null
+          buyer_id: number
           created_at?: string
           id?: number
-          item_id?: number | null
-          meeting_location?: string | null
-          meeting_time?: string | null
-          status?: Json | null
+          item_id: number
+          meeting_location: string
+          meeting_time: string
+          seller_id: number
+          status?: Json
         }
         Update: {
-          buyer_id?: number | null
+          buyer_id?: number
           created_at?: string
           id?: number
-          item_id?: number | null
-          meeting_location?: string | null
-          meeting_time?: string | null
-          status?: Json | null
+          item_id?: number
+          meeting_location?: string
+          meeting_time?: string
+          seller_id?: number
+          status?: Json
         }
         Relationships: [
           {
@@ -50,6 +53,13 @@ export type Database = {
             columns: ["item_id"]
             isOneToOne: false
             referencedRelation: "items"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_seller_id_fkey"
+            columns: ["seller_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
         ]

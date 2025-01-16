@@ -1,4 +1,4 @@
-import { CategoryCount, Item } from "../_types";
+import { CategoryCount, Item, MyAppointment, MyItem } from "../_types";
 // Public
 import { createClient as createBrowserClient } from "./supabase/client";
 // With auth
@@ -183,9 +183,9 @@ export async function getDashboardStats(userId: number) {
   const supabase = await createServerClient();
 
   type AppointmentStatus = {
-    buyer_status: "pending" | "confirmed" | "cancelled";
-    seller_status: "pending" | "confirmed" | "cancelled";
-    overall_status: "pending" | "confirmed" | "cancelled";
+    buyer_status: "pending" | "confirmed" | "canceled";
+    seller_status: "pending" | "confirmed" | "canceled";
+    overall_status: "pending" | "completed" | "canceled";
     buyer_confirmed_at?: string | null;
     seller_confirmed_at?: string | null;
   };
@@ -220,12 +220,11 @@ export async function getDashboardStats(userId: number) {
     Completed:
       appointmentStats?.filter(
         (app) =>
-          (app.status as AppointmentStatus).overall_status === "confirmed"
+          (app.status as AppointmentStatus).overall_status === "completed"
       ).length || 0,
     Canceled:
       appointmentStats?.filter(
-        (app) =>
-          (app.status as AppointmentStatus).overall_status === "cancelled"
+        (app) => (app.status as AppointmentStatus).overall_status === "canceled"
       ).length || 0,
   };
 
@@ -274,7 +273,8 @@ export async function getMyItems(userId: number) {
     console.error("Error fetching items:", error);
     throw error;
   }
-  return items;
+
+  return items as unknown as MyItem[];
 }
 
 export async function getMyItemDetail(itemId: number, userId: number) {
@@ -290,7 +290,7 @@ export async function getMyItemDetail(itemId: number, userId: number) {
   return data;
 }
 
-// My Apointments
+// My Appointments
 export async function getMyAppointments(userId: number) {
   const supabase = await createServerClient();
   const { data, error } = await supabase
@@ -303,13 +303,15 @@ export async function getMyAppointments(userId: number) {
       seller:users!seller_id(*)
     `
     )
-    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`);
+    .or(`buyer_id.eq.${userId},seller_id.eq.${userId}`)
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Error fetching appointments:", error);
     throw error;
   }
-  return data;
+
+  return data as unknown as MyAppointment[];
 }
 
 export async function getMyAppointmentDetail(

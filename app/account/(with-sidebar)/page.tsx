@@ -14,7 +14,7 @@ export default async function AccountPage() {
   const userData = await getSupabaseUserData();
 
   if (!userData) {
-    redirect("/auth/login");
+    redirect("/login");
   }
 
   const stats = await getDashboardStats(userData.id);

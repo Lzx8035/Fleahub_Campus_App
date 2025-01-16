@@ -1,81 +1,87 @@
 import React from "react";
+import { redirect } from "next/navigation";
 import OptionBar from "@/app/_components/OptionBar";
 import AppointmentCard from "@/app/_components/AppointmentCard";
 import PaginationBar from "@/app/_components/PaginationBar";
+import {
+  getMyAppointments,
+  getSupabaseUserData,
+} from "@/app/_lib/data_service";
+import { getClientPagination } from "@/app/_lib/utils";
+import { getClientSort } from "@/app/_lib/utils";
+import { createAppointmentSortConfig } from "@/app/_lib/utils";
+import { MyAppointment, SearchParams } from "@/app/_types";
 
-export default function AppointmentsPage() {
-  const sortOptions = [
-    { label: "All Appointments", value: "all" },
-    { label: "Pending", value: "pending" },
-    { label: "Completed", value: "completed" },
-    { label: "Cancelled", value: "cancelled" },
-  ];
+const sortOptions = [
+  { label: "All Appointments", value: "all" },
+  { label: "Pending", value: "pending" },
+  { label: "Completed", value: "completed" },
+  { label: "Canceled", value: "canceled" },
+  { label: "Newest", value: "newest" },
+  { label: "Oldest", value: "oldest" },
+];
 
-  const sampleAppointments = [
-    {
-      id: "APT001",
-      title: "Vintage Camera",
-      description: "Meeting to check the camera condition and discuss details.",
-      image: "/api/placeholder/400/400",
-      price: 299.99,
-      date: "2024-01-15",
-      meetTime: "14:30",
-      location: "Campus Center",
-      partnerId: "USER123",
-      partnerName: "John Doe",
-      status: "pending",
-    },
-    {
-      id: "APT002",
-      title: "Textbooks Bundle",
-      description: "Exchange textbooks for next semester.",
-      image: "/api/placeholder/400/400",
-      price: 150.0,
-      date: "2024-01-16",
-      meetTime: "11:00",
-      location: "Library Entrance",
-      partnerId: "USER456",
-      partnerName: "Jane Smith",
-      status: "completed",
-    },
-    {
-      id: "APT003",
-      title: "Desk Lamp",
-      description: "Pickup the study lamp.",
-      image: "/api/placeholder/400/400",
-      price: 45.0,
-      date: "2024-01-17",
-      meetTime: "15:45",
-      location: "Student Union",
-      partnerId: "USER789",
-      partnerName: "Mike Johnson",
-      status: "cancelled",
-    },
-  ] as const;
+export default async function AppointmentsPage({
+  searchParams,
+}: {
+  searchParams: SearchParams;
+}) {
+  const userData = await getSupabaseUserData();
 
-  const pageOption = {
-    currentPage: 1,
-    totalPages: 2,
-    itemsPerPage: 4,
-  };
+  if (!userData) {
+    redirect("/login");
+  }
+
+  const myAppointments = await getMyAppointments(userData.id!);
+  const { sort } = await searchParams;
+  const currentSort = sort || "all";
+
+  if (!myAppointments?.length) {
+    return (
+      <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-semibold mb-2">No appointments yet</h2>
+          <p className="text-gray-500 mb-4">
+            You don&apos;t have any appointments at the moment.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const sortedItems = getClientSort<MyAppointment>({
+    items: myAppointments,
+    currentSort,
+    sortConfig: createAppointmentSortConfig(),
+  });
+
+  const { paginatedItems, pageOption, hasMultiplePages } =
+    await getClientPagination<MyAppointment>({
+      searchParams,
+      items: sortedItems,
+    });
 
   return (
     <div className="space-y-6">
       <div className="w-full">
         <OptionBar
           sortOptions={sortOptions}
-          currentSort="all"
+          currentSort={currentSort}
           page="account/my_appointments"
         />
       </div>
 
       <div className="space-y-4">
-        {sampleAppointments.map((appointment) => (
-          <AppointmentCard key={appointment.id} appointment={appointment} />
+        {paginatedItems.map((appointment) => (
+          <AppointmentCard
+            key={appointment.id}
+            appointment={appointment}
+            userId={userData.id!}
+          />
         ))}
       </div>
 
-      {sampleAppointments.length > 4 && (
+      {hasMultiplePages && (
         <div className="mt-8 flex justify-center">
           <PaginationBar
             pageOption={pageOption}

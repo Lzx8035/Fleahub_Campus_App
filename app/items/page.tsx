@@ -2,15 +2,15 @@ import {
   getItemsBySearchParams,
   getMainCategoriesCount,
   getUserWishlist,
-} from "../_lib/data_service";
+} from "@/app/_lib/data_service";
 
-import ItemsGrid from "../_components/ItemsGrid";
-import CategoriesBar from "../_components/CategoriesBar";
-import OptionBar from "../_components/OptionBar";
-import PaginationBar from "../_components/PaginationBar";
+import ItemsGrid from "@/app/_components/ItemsGrid";
+import CategoriesBar from "@/app/_components/CategoriesBar";
+import OptionBar from "@/app/_components/OptionBar";
+import PaginationBar from "@/app/_components/PaginationBar";
 
-import { SortOption, PageOption } from "../_types";
-import { createClient } from "../_lib/supabase/server";
+import { SortOption, PageOption, SearchParams } from "@/app/_types";
+import { createClient } from "@/app/_lib/supabase/server";
 
 export const metadata = {
   title: "Items",
@@ -21,12 +21,6 @@ const sortOptions: Array<SortOption> = [
   { value: "price-low", label: "Price: Low to High" },
   { value: "price-high", label: "Price: High to Low" },
 ];
-
-interface SearchParams {
-  page?: string;
-  category?: string;
-  sort?: string;
-}
 
 export default async function ItemsPage({
   searchParams,

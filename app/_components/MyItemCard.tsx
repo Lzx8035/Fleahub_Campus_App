@@ -7,15 +7,12 @@ import Image from "next/image";
 import { Pencil, Bookmark, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
+import { getImageUrls } from "../_lib/utils";
+import { MyItem } from "../_types";
+import { formatDistanceToNow } from "date-fns";
 
 interface ItemCardProps {
-  item: {
-    id: number;
-    title: string;
-    price: number;
-    status: "available" | "sold" | "reserved";
-    image: string;
-  };
+  myItem: MyItem;
 }
 
 const statusStyles = {
@@ -24,7 +21,7 @@ const statusStyles = {
   reserved: "bg-gray-400 hover:bg-gray-400",
 };
 
-export default function MyItemCard({ item }: ItemCardProps) {
+export default function MyItemCard({ myItem }: ItemCardProps) {
   function handleReserve(id: number) {
     console.log(id);
   }
@@ -36,33 +33,38 @@ export default function MyItemCard({ item }: ItemCardProps) {
       {/* Left Section: Image */}
       <div className="w-40 h-40 relative rounded-lg overflow-hidden flex-shrink-0">
         <Image
-          src={item.image || "/api/placeholder/400/400"}
-          alt={item.title}
+          src={getImageUrls(myItem.images)[0] || "/api/placeholder/400/400"}
+          alt={myItem.title}
           fill
+          priority
           className="object-cover"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
       </div>
 
       {/* Middle Section: Info */}
       <div className="flex-1 flex flex-col justify-between">
         <div>
-          <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+          <h3 className="font-semibold text-lg mb-2">{myItem.title}</h3>
           <p className="text-2xl font-bold text-slate-900 mb-3">
-            ${item.price.toLocaleString()}
+            ${myItem.price.toLocaleString()}
           </p>
           <Badge
             variant="secondary"
-            className={`${statusStyles[item.status]} text-white`}
+            className={`${statusStyles[myItem.status]} text-white`}
           >
-            {item.status.charAt(0).toUpperCase() + item.status.slice(1)}
+            {myItem.status.charAt(0).toUpperCase() + myItem.status.slice(1)}
           </Badge>
         </div>
+        <p className=" text-slate-500 mb-3">
+          Created at {formatDistanceToNow(myItem.created_at)} ago
+        </p>
       </div>
 
       {/* Right Section: Actions */}
       <div className="flex flex-col gap-2 justify-start">
         <Button variant="outline" size="sm" className="w-24" asChild>
-          <Link href={`/account/my_items/edit?id=${item.id}`}>
+          <Link href={`/account/my_items/edit?id=${myItem.id}`}>
             <Pencil className="w-4 h-4 mr-2" /> Edit
           </Link>
         </Button>
@@ -70,9 +72,9 @@ export default function MyItemCard({ item }: ItemCardProps) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleReserve(item.id)}
+          onClick={() => handleReserve(myItem.id)}
           className="w-24"
-          disabled={item.status === "sold"}
+          disabled={myItem.status === "sold"}
         >
           <Bookmark className="w-4 h-4 mr-2" />
           Reserve
@@ -81,7 +83,7 @@ export default function MyItemCard({ item }: ItemCardProps) {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => handleDelete(item.id)}
+          onClick={() => handleDelete(myItem.id)}
           className="w-24 text-rose-500 hover:text-rose-600"
         >
           <Trash2 className="w-4 h-4 mr-2" />

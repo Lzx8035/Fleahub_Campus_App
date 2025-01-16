@@ -19,6 +19,12 @@ export type CategoryCount = {
   count: number;
 };
 
+export interface SearchParams {
+  page?: string;
+  category?: string;
+  sort?: string;
+}
+
 ////////////
 // type Seller = {
 //   id: Database["public"]["Tables"]["users"]["Row"]["id"];
@@ -29,6 +35,21 @@ export type CategoryCount = {
 // export type ItemDetail = Database["public"]["Tables"]["items"]["Row"] & {
 //   seller: Seller;
 // };
+
+export type WishlistItem = {
+  id: number;
+  created_at: string;
+  item_id: number | null;
+  user_id: number | null;
+  items: {
+    id: number;
+    title: string;
+    price: number;
+    images: string;
+    status: string;
+    description: string;
+  } | null;
+};
 
 export type WishlistItems = {
   id: number;
@@ -44,3 +65,46 @@ export type WishlistItems = {
     description: string;
   } | null;
 }[];
+
+/////////////////////////////////////////////
+
+export type MyItem = {
+  id: number;
+  created_at: string;
+  update_at: string | null;
+  title: string;
+  description: string;
+  price: number;
+  seller_id: number;
+  status: "available" | "sold" | "reserved";
+  categories: string;
+  images: string;
+  seller: {
+    id: number;
+    created_at: string;
+    email: string;
+    name: string;
+    avatar_url: string | null;
+  };
+};
+
+/////////////////////////////////////////////
+type AppointmentStatus = "pending" | "completed" | "canceled";
+
+type AppointmentStatusObject = {
+  buyer_status: string;
+  seller_status: string;
+  overall_status: AppointmentStatus;
+  buyer_confirmed_at: string | null;
+  seller_confirmed_at: string | null;
+};
+
+export type MyAppointment = Omit<
+  Database["public"]["Tables"]["appointments"]["Row"],
+  "status"
+> & {
+  items: Database["public"]["Tables"]["items"]["Row"];
+  buyer: Database["public"]["Tables"]["users"]["Row"];
+  seller: Database["public"]["Tables"]["users"]["Row"];
+  status: AppointmentStatusObject;
+};
