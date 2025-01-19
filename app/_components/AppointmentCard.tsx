@@ -128,7 +128,7 @@ export default function AppointmentCard({
 
       <div className="flex flex-col gap-2 justify-start">
         <Button variant="outline" size="sm" className="w-24" asChild>
-          <Link href="/account/my_appointments/edit">
+          <Link href={`/account/my_appointments/edit?id=${appointment.id}`}>
             <Pencil className="w-4 h-4 mr-2" />
             Edit
           </Link>

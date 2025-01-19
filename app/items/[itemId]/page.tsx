@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
 import AppointmentButton from "@/app/_components/AppointmentButton";
+import BackButton from "@/app/_components/BackButton";
 import ImageCarousel from "@/app/_components/ImageCarousel";
 import WishlistButton from "@/app/_components/WishlistButton";
 import { getItemDetail, getUserWishlist } from "@/app/_lib/data_service";
@@ -9,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { MessageCircle } from "lucide-react";
 import { notFound } from "next/navigation";
+import { CircleX } from "lucide-react";
 
 export default async function ItemDetailPage({
   params,
@@ -42,7 +44,14 @@ export default async function ItemDetailPage({
           <div className="w-full sm:w-1/2">
             <div className="space-y-6 pb-8">
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold">{item.title}</h1>
+                <div className="flex items-center justify-between">
+                  <h1 className="text-2xl sm:text-3xl font-bold">
+                    {item.title}
+                  </h1>
+                  <BackButton>
+                    <CircleX className="w-9 h-9 text-slate-400 mr-8" />
+                  </BackButton>
+                </div>
                 <p className="text-xl sm:text-2xl font-bold text-[#2a2f33] mt-4">
                   ${item.price}
                 </p>
@@ -74,9 +83,11 @@ export default async function ItemDetailPage({
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4">
-                <AppointmentButton itemId={item.id}
+                <AppointmentButton
+                  itemId={item.id}
                   size="default"
-                  isLoggedIn={isLoggedIn}/>
+                  isLoggedIn={isLoggedIn}
+                />
 
                 <WishlistButton
                   itemId={item.id}

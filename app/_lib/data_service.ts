@@ -281,13 +281,13 @@ export async function getMyItemDetail(itemId: number, userId: number) {
   const supabase = await createServerClient();
   const { data, error } = await supabase
     .from("items")
-    .select("*, seller:users!seller_id(*)")
+    .select("*")
     .eq("id", itemId)
     .eq("seller_id", userId)
     .single();
 
   if (error) throw error;
-  return data;
+  return data as Item;
 }
 
 // My Appointments
