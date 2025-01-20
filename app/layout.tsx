@@ -2,6 +2,7 @@ import "@/app/_styles/globals.css";
 import Header from "@/app/_components/Header";
 
 import { Toaster } from "sonner";
+import ScrollToTop from "./_components/ScrollToTop";
 
 export const metadata = {
   title: {
@@ -20,6 +21,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
+        <ScrollToTop />
         <Header />
         <main className="flex-1 mt-0">{children}</main>
         <Toaster />

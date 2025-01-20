@@ -314,20 +314,30 @@ export async function getMyAppointments(userId: number) {
   return data as unknown as MyAppointment[];
 }
 
+// BUG
 export async function getMyAppointmentDetail(
   appointmentId: number,
   userId: number
 ) {
   const supabase = await createServerClient();
+
   const { data, error } = await supabase
     .from("appointments")
-    .select("*, items(*), buyer:users!buyer_id(*)")
+    .select(
+      `
+      *,
+      items (*),
+      buyer:users!buyer_id(*),
+      seller:users!seller_id(*)
+    `
+    )
     .eq("id", appointmentId)
-    .or(`buyer_id.eq.${userId},items.seller_id.eq.${userId}`)
+    .or(`buyer_id.eq.${userId}, seller_id.eq.${userId}`)
     .single();
 
   if (error) throw error;
-  return data;
+
+  return data as MyAppointment;
 }
 
 ////

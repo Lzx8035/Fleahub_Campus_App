@@ -3,7 +3,7 @@ import { getMyItemDetail, getSupabaseUserData } from "@/app/_lib/data_service";
 import { Item } from "@/app/_types";
 import { redirect } from "next/navigation";
 
-export default async function ItemPage({
+export default async function MyItemEditPage({
   searchParams,
 }: {
   searchParams: { id?: string };
@@ -18,11 +18,10 @@ export default async function ItemPage({
 
   const { id } = await searchParams;
 
+  console.log(id);
+
   if (id) {
     initialData = await getMyItemDetail(Number(id), userData.id!);
-    if (!initialData) {
-      return <div>Item not found</div>;
-    }
   }
 
   console.log(initialData);

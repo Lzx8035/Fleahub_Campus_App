@@ -6,7 +6,6 @@ import { formatDistanceToNow, format } from "date-fns";
 import { MyAppointment } from "@/app/_types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   Check,
   X,
@@ -18,22 +17,12 @@ import {
   Handshake,
 } from "lucide-react";
 import { getImageUrls } from "../_lib/utils";
+import AppointmentTag from "./AppointmentTag";
 
 interface AppointmentCardProps {
   appointment: MyAppointment;
   userId: number;
 }
-
-const statusStyles = {
-  pending: "bg-amber-500 ",
-  completed: "bg-indigo-500 ",
-  canceled: "bg-gray-500 ",
-};
-
-const roleStyles = {
-  buy: "bg-pink-400",
-  sell: "bg-emerald-400",
-};
 
 export default function AppointmentCard({
   appointment,
@@ -68,25 +57,10 @@ export default function AppointmentCard({
                 Order ID: {appointment.id}
               </p>
             </div>
-            <div className="flex gap-2">
-              <Badge
-                variant="secondary"
-                className={`${
-                  roleStyles[isCurrentUserBuyer ? "buy" : "sell"]
-                } text-white`}
-              >
-                {isCurrentUserBuyer ? "Buy" : "Sell"}
-              </Badge>
-              <Badge
-                variant="secondary"
-                className={`${
-                  statusStyles[appointment.status.overall_status]
-                } text-white`}
-              >
-                {appointment.status!.overall_status.charAt(0).toUpperCase() +
-                  appointment.status!.overall_status.slice(1)}
-              </Badge>
-            </div>
+            <AppointmentTag
+              role={isCurrentUserBuyer ? "buy" : "sell"}
+              status={appointment.status.overall_status}
+            />
           </div>
 
           <div>

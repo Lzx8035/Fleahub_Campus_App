@@ -17,6 +17,7 @@ export type Database = {
           item_id: number
           meeting_location: string
           meeting_time: string
+          payment_method: Database["public"]["Enums"]["payment_method_type"]
           seller_id: number
           status: Json
         }
@@ -27,6 +28,7 @@ export type Database = {
           item_id: number
           meeting_location: string
           meeting_time: string
+          payment_method?: Database["public"]["Enums"]["payment_method_type"]
           seller_id: number
           status?: Json
         }
@@ -37,6 +39,7 @@ export type Database = {
           item_id?: number
           meeting_location?: string
           meeting_time?: string
+          payment_method?: Database["public"]["Enums"]["payment_method_type"]
           seller_id?: number
           status?: Json
         }
@@ -234,7 +237,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      payment_method_type: "cash" | "emt" | "both"
     }
     CompositeTypes: {
       [_ in never]: never
