@@ -82,10 +82,7 @@ export async function getItemDetail(id: number) {
     .select(
       `
         *,
-        seller:users!seller_id (
-          id,
-          name,
-          avatar_url
+        seller:users!seller_id (*
         )
       `
     )
@@ -314,7 +311,6 @@ export async function getMyAppointments(userId: number) {
   return data as unknown as MyAppointment[];
 }
 
-// BUG
 export async function getMyAppointmentDetail(
   appointmentId: number,
   userId: number

@@ -1,15 +1,15 @@
 import MyAppointmentForm from "@/app/_components/MyAppointmentForm";
 import {
+  getItemDetail,
   getMyAppointmentDetail,
   getSupabaseUserData,
 } from "@/app/_lib/data_service";
 import { redirect } from "next/navigation";
 
-// BUG
 export default async function MyAppointmentEditPage({
   searchParams,
 }: {
-  searchParams: { id?: string };
+  searchParams: { id?: string; itemId?: string };
 }) {
   const userData = await getSupabaseUserData();
 
@@ -17,18 +17,48 @@ export default async function MyAppointmentEditPage({
     redirect("/login");
   }
 
-  const { id } = await searchParams;
+  const { id, itemId } = await searchParams;
 
-  const initialData = await getMyAppointmentDetail(Number(id), userData.id!);
+  if (id) {
+    const appointmentData = await getMyAppointmentDetail(
+      Number(id),
+      userData.id!
+    );
 
-  console.log(initialData);
+    if (!appointmentData) {
+      return <div>Appointment not found</div>;
+    }
 
-  return (
-    <div className="max-w-3xl mx-auto mt-12 mb-12">
-      <h1 className="text-2xl font-bold mb-8">
-        {id ? "Edit Appointment" : "Create New Appointment"}
-      </h1>
-      <MyAppointmentForm initialData={initialData} userId={userData.id} />
-    </div>
-  );
+    return (
+      <div className="max-w-3xl mx-auto mt-12 mb-12">
+        <h1 className="text-2xl font-bold mb-8">Edit Appointment</h1>
+        <MyAppointmentForm
+          mode="edit"
+          appointmentData={appointmentData}
+          userId={userData.id}
+        />
+      </div>
+    );
+  }
+
+  if (itemId) {
+    const itemData = await getItemDetail(Number(itemId));
+
+    if (!itemData) {
+      return <div>Item not available</div>;
+    }
+
+    return (
+      <div className="max-w-3xl mx-auto mt-12 mb-12">
+        <h1 className="text-2xl font-bold mb-8">Create New Appointment</h1>
+        <MyAppointmentForm
+          mode="create"
+          itemData={itemData}
+          userId={userData.id}
+        />
+      </div>
+    );
+  }
+
+  return <div>Invalid request</div>;
 }

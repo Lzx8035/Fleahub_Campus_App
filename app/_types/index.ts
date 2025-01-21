@@ -108,3 +108,8 @@ export type MyAppointment = Omit<
   seller: Database["public"]["Tables"]["users"]["Row"];
   status: AppointmentStatusObject;
 };
+
+/////////////////////////////////////////////
+export type ItemDetail = Database["public"]["Tables"]["items"]["Row"] & {
+  seller: Database["public"]["Tables"]["users"]["Row"];
+};

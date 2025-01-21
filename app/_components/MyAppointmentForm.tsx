@@ -15,7 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { CalendarIcon, Clock, MapPin, Banknote } from "lucide-react";
-import type { MyAppointment } from "@/app/_types";
+import type { ItemDetail, MyAppointment } from "@/app/_types";
 import { getImageUrls } from "../_lib/utils";
 import AppointmentTag from "./AppointmentTag";
 
@@ -27,29 +27,34 @@ const locations = [
 ] as const;
 
 interface AppointmentFormProps {
-  initialData: MyAppointment;
+  mode: "create" | "edit";
+  itemData?: ItemDetail;
+  appointmentData?: MyAppointment;
   userId: number;
 }
 
 type PaymentMethod = "cash" | "emt" | "both";
 
 export default function MyAppointmentForm({
-  initialData,
+  mode,
+  itemData,
+  appointmentData,
   userId,
 }: AppointmentFormProps) {
   const router = useRouter();
+  const isEditMode = mode === "edit";
+  const isCurrentUserBuyer = isEditMode
+    ? appointmentData?.buyer_id === userId
+    : true;
 
-  const isCurrentUserBuyer = initialData.buyer_id === userId;
+  const displayItem = isEditMode ? appointmentData?.items : itemData!;
 
+  // 状态初始化
   const [meetingDate, setMeetingDate] = useState(() => {
-    if (
-      !initialData?.meeting_time ||
-      typeof initialData.meeting_time !== "string"
-    ) {
-      return "";
-    }
+    if (!isEditMode) return "";
+    if (!appointmentData?.meeting_time) return "";
     try {
-      const date = new Date(initialData.meeting_time);
+      const date = new Date(appointmentData.meeting_time);
       return date.toISOString().split("T")[0];
     } catch {
       return "";
@@ -57,14 +62,10 @@ export default function MyAppointmentForm({
   });
 
   const [meetingTime, setMeetingTime] = useState(() => {
-    if (
-      !initialData?.meeting_time ||
-      typeof initialData.meeting_time !== "string"
-    ) {
-      return "";
-    }
+    if (!isEditMode) return "";
+    if (!appointmentData?.meeting_time) return "";
     try {
-      const date = new Date(initialData.meeting_time);
+      const date = new Date(appointmentData.meeting_time);
       return date.toLocaleTimeString("en-US", {
         hour12: false,
         hour: "2-digit",
@@ -76,17 +77,13 @@ export default function MyAppointmentForm({
   });
 
   const [location, setLocation] = useState(() => {
-    if (!initialData?.meeting_location) return "student_center";
-    return locations.some((loc) => loc.value === initialData.meeting_location)
-      ? initialData.meeting_location
-      : "student_center";
+    if (!isEditMode) return "student_center";
+    return appointmentData?.meeting_location || "student_center";
   });
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(() => {
-    if (!initialData?.payment_method) return "both";
-    return ["cash", "emt", "both"].includes(initialData.payment_method)
-      ? (initialData.payment_method as PaymentMethod)
-      : "both";
+    if (!isEditMode) return "both";
+    return (appointmentData?.payment_method as PaymentMethod) || "both";
   });
 
   // TODO not texted yet
@@ -94,20 +91,24 @@ export default function MyAppointmentForm({
     e.preventDefault();
 
     const formData = new FormData();
-
     const combinedDateTime = `${meetingDate} ${meetingTime}:00`;
+
     formData.append("meeting_time", combinedDateTime);
     formData.append("meeting_location", location);
     formData.append("payment_method", paymentMethod);
 
+    if (!isEditMode) {
+      // 新建模式需要额外的数据
+      formData.append("item_id", itemData?.id.toString() || "");
+    }
+
     try {
-      const url = initialData?.id
-        ? `/api/appointments/${initialData.id}`
+      const url = isEditMode
+        ? `/api/appointments/${appointmentData?.id}`
         : "/api/appointments";
-      const method = initialData?.id ? "PUT" : "POST";
 
       const response = await fetch(url, {
-        method,
+        method: isEditMode ? "PUT" : "POST",
         body: formData,
       });
 
@@ -121,6 +122,10 @@ export default function MyAppointmentForm({
     }
   };
 
+  if (!displayItem) {
+    return <div>No item data available</div>;
+  }
+
   return (
     <>
       <Card className="mb-8">
@@ -132,10 +137,10 @@ export default function MyAppointmentForm({
             <div className="w-40 h-40 relative rounded-lg overflow-hidden flex-shrink-0">
               <Image
                 src={
-                  getImageUrls(initialData?.items.images)[0] ||
+                  getImageUrls(displayItem?.images)[0] ||
                   "/api/placeholder/400/400"
                 }
-                alt={initialData?.items.title}
+                alt={displayItem?.title}
                 fill
                 priority
                 className="object-cover"
@@ -144,31 +149,44 @@ export default function MyAppointmentForm({
             </div>
             <div className="flex-1">
               <h3 className="text-xl font-semibold mb-2">
-                {initialData?.items.title}
+                {displayItem?.title}
               </h3>
               <p className="text-2xl font-bold text-slate-900 mb-4">
-                ${initialData?.items.price}
+                ${displayItem?.price}
               </p>
-              <p className="text-sm text-slate-500">
-                {isCurrentUserBuyer ? "Seller" : "Buyer"}:{" "}
-                {isCurrentUserBuyer
-                  ? initialData.seller.name
-                  : initialData.buyer.name}{" "}
-                ID:{" "}
-                {isCurrentUserBuyer
-                  ? initialData.seller_id
-                  : initialData.buyer_id}
-              </p>
-              <p className="text-sm text-slate-500">
-                Email:{" "}
-                {isCurrentUserBuyer
-                  ? initialData.seller.email
-                  : initialData.buyer.email}
-              </p>
-              <AppointmentTag
-                role={isCurrentUserBuyer ? "buy" : "sell"}
-                status={initialData.status!.overall_status}
-              />
+              {isEditMode ? (
+                <>
+                  <p className="text-sm text-slate-500">
+                    {isCurrentUserBuyer ? "Seller" : "Buyer"}:{" "}
+                    {isCurrentUserBuyer
+                      ? appointmentData?.seller.name
+                      : appointmentData?.buyer.name}{" "}
+                    ID:{" "}
+                    {isCurrentUserBuyer
+                      ? appointmentData?.seller_id
+                      : appointmentData?.buyer_id}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Email:{" "}
+                    {isCurrentUserBuyer
+                      ? appointmentData?.seller.email
+                      : appointmentData?.buyer.email}
+                  </p>
+                  <AppointmentTag
+                    role={isCurrentUserBuyer ? "buy" : "sell"}
+                    status={appointmentData?.status.overall_status || "pending"}
+                  />
+                </>
+              ) : (
+                <>
+                  <p className="text-sm text-slate-500">
+                    Seller: {itemData?.seller.name} ID: {itemData?.seller_id}
+                  </p>
+                  <p className="text-sm text-slate-500">
+                    Email: {itemData?.seller.email}
+                  </p>
+                </>
+              )}
             </div>
           </div>
         </CardContent>
@@ -258,7 +276,7 @@ export default function MyAppointmentForm({
                 type="submit"
                 className="bg-indigo-500 hover:bg-indigo-600"
               >
-                {initialData.id ? "Update Appointment" : "Create Appointment"}
+                {isEditMode ? "Update Appointment" : "Create Appointment"}
               </Button>
               <Button
                 type="button"
