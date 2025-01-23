@@ -11,6 +11,7 @@ interface AppointmentButtonProps {
   className?: string;
   size?: "default" | "sm" | "lg";
   isLoggedIn?: boolean;
+  isDisabled: boolean;
 }
 
 export default function AppointmentButton({
@@ -18,6 +19,7 @@ export default function AppointmentButton({
   className = "",
   size = "sm",
   isLoggedIn = false,
+  isDisabled = false,
 }: AppointmentButtonProps) {
   const router = useRouter();
 
@@ -38,6 +40,13 @@ export default function AppointmentButton({
       />
     );
   }
+
+  if (isDisabled)
+    return (
+      <Button disabled className={`flex-1 ${className}`} size={size}>
+        Make Appointment
+      </Button>
+    );
 
   return (
     <Button className={`flex-1 ${className}`} size={size} asChild>

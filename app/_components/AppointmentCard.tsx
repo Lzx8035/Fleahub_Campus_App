@@ -50,9 +50,13 @@ export default function AppointmentCard({
         <div className="space-y-3">
           <div className="flex items-start justify-between">
             <div>
-              <h3 className="font-semibold text-lg">
+              <Link
+                href={`/items/${appointment.items.id}`}
+                className="font-semibold text-lg hover:text-stone-600 hover:underline"
+              >
                 {appointment.items.title}
-              </h3>
+              </Link>
+
               <p className="text-sm text-slate-500">
                 Order ID: {appointment.id}
               </p>
@@ -101,17 +105,24 @@ export default function AppointmentCard({
       </div>
 
       <div className="flex flex-col gap-2 justify-start">
-        <Button variant="outline" size="sm" className="w-24" asChild>
-          <Link href={`/account/my_appointments/edit?id=${appointment.id}`}>
+        {appointment.status.overall_status !== "pending" ? (
+          <Button variant="outline" size="sm" className="w-28" disabled>
             <Pencil className="w-4 h-4 mr-2" />
             Edit
-          </Link>
-        </Button>
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className="w-28" asChild>
+            <Link href={`/account/my_appointments/edit?id=${appointment.id}`}>
+              <Pencil className="w-4 h-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+        )}
 
         <Button
           variant="outline"
           size="sm"
-          className="w-24"
+          className="w-28"
           disabled={appointment.status.overall_status !== "pending"}
         >
           <Check className="w-4 h-4 mr-2" />
@@ -121,14 +132,14 @@ export default function AppointmentCard({
         <Button
           variant="outline"
           size="sm"
-          className="w-24"
+          className="w-28"
           disabled={appointment.status.overall_status !== "pending"}
         >
           <X className="w-4 h-4 mr-2" />
           Cancel
         </Button>
 
-        <Button variant="outline" size="sm" className="w-24">
+        <Button variant="outline" size="sm" className="w-28">
           <MessageCircle className="w-4 h-4 mr-2" />
           Message
         </Button>

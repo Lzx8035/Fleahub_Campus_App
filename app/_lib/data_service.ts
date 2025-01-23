@@ -1,4 +1,10 @@
-import { CategoryCount, Item, MyAppointment, MyItem } from "../_types";
+import {
+  CategoryCount,
+  Item,
+  ItemDetail,
+  MyAppointment,
+  MyItem,
+} from "../_types";
 // Public
 import { createClient as createBrowserClient } from "./supabase/client";
 // With auth
@@ -75,23 +81,54 @@ export async function getItemsBySearchParams(
 // Item Detail Page
 /////////////////////////////////////////////////////////////////
 
-export async function getItemDetail(id: number) {
+// I don't want to change this 💩
+export async function getItemDetail(
+  id: number,
+  userId: number
+): Promise<ItemDetail | null> {
   const supabaseClient = createBrowserClient();
-  const { data: item, error } = await supabaseClient
+
+  const { data: appointmentData, error: appointmentError } =
+    await supabaseClient
+      .from("appointments")
+      .select("buyer_id")
+      .eq("item_id", id)
+      .eq("buyer_id", userId)
+      .maybeSingle();
+
+  const isBuyer = !!appointmentData;
+
+  if (appointmentError) {
+    console.error("Error checking buyer status:", appointmentError.message);
+    return null;
+  }
+
+  let query = supabaseClient
     .from("items")
     .select(
       `
-        *,
-        seller:users!seller_id (*
-        )
-      `
+      *,
+      seller:users!seller_id (*),
+      appointments (buyer_id)
+    `
     )
-    .eq("id", id)
-    .eq("status", "available")
-    .single();
+    .eq("id", id);
+
+  if (isBuyer) {
+  } else if (userId) {
+    query = query.or(`status.eq.available,seller_id.eq.${userId}`);
+  } else {
+    query = query.eq("status", "available");
+  }
+
+  const { data: item, error } = await query.maybeSingle();
 
   if (error) {
-    console.error(error);
+    console.error(
+      "Error while fetching item details:",
+      error.message,
+      error.hint
+    );
     return null;
   }
 

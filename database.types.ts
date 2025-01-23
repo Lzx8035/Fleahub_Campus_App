@@ -228,6 +228,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_item_detail: {
+        Args: {
+          item_id: number
+          user_id?: number
+        }
+        Returns: {
+          id: number
+          name: string
+          status: string
+          seller: Json
+          appointments: Json
+        }[]
+      }
       get_main_categories_count: {
         Args: Record<PropertyKey, never>
         Returns: {

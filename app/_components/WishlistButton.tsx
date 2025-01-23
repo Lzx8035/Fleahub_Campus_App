@@ -17,6 +17,7 @@ interface WishlistButtonProps {
   size?: "default" | "sm" | "lg";
   onlyDelete?: boolean;
   isLoggedIn?: boolean;
+  isDisabled?: boolean;
 }
 
 export default function WishlistButton({
@@ -26,6 +27,7 @@ export default function WishlistButton({
   size = "sm",
   onlyDelete = false,
   isLoggedIn = false,
+  isDisabled = false,
 }: WishlistButtonProps) {
   const [wishlistItems, setWishlistItems] = useState(initialWishlistItems);
   const [isPending, setIsPending] = useState(false);
@@ -113,6 +115,14 @@ export default function WishlistButton({
         buttonClassName={`w-full ${className}`}
         buttonSize={size}
       />
+    );
+  }
+
+  if (isDisabled) {
+    return (
+      <Button size={size} className={`w-full ${className}`} disabled>
+        Add to Wishlist
+      </Button>
     );
   }
 

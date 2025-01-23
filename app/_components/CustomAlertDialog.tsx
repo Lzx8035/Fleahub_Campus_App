@@ -20,7 +20,7 @@ interface CustomAlertDialogProps {
   cancelText?: string;
   confirmText?: string;
   onConfirm: (() => void) | (() => Promise<void>);
-  variant?: "default" | "secondary" | "destructive" | "ghost";
+  variant?: "default" | "secondary" | "destructive" | "ghost" | "outline";
   buttonClassName?: string;
   buttonSize?: "default" | "sm" | "lg";
   disabled?: boolean;

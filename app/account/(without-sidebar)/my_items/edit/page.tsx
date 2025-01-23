@@ -18,13 +18,9 @@ export default async function MyItemEditPage({
 
   const { id } = await searchParams;
 
-  console.log(id);
-
   if (id) {
     initialData = await getMyItemDetail(Number(id), userData.id!);
   }
-
-  console.log(initialData);
 
   return (
     <div className="max-w-3xl mx-auto mt-12 mb-12">

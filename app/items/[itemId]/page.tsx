@@ -3,13 +3,16 @@ import AppointmentButton from "@/app/_components/AppointmentButton";
 import BackButton from "@/app/_components/BackButton";
 import ImageCarousel from "@/app/_components/ImageCarousel";
 import WishlistButton from "@/app/_components/WishlistButton";
-import { getItemDetail, getUserWishlist } from "@/app/_lib/data_service";
-import { createClient } from "@/app/_lib/supabase/server";
+import {
+  getItemDetail,
+  getSupabaseUserData,
+  getUserWishlist,
+} from "@/app/_lib/data_service";
 import { getImageUrls } from "@/app/_lib/utils";
 import { Card } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { MessageCircle } from "lucide-react";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { CircleX } from "lucide-react";
 
 export default async function ItemDetailPage({
@@ -17,14 +20,15 @@ export default async function ItemDetailPage({
 }: {
   params: { itemId: string };
 }) {
-  const supabase = await createClient();
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  const isLoggedIn = !!session;
+  const userData = await getSupabaseUserData();
+
+  if (!userData) {
+    redirect("/login");
+  }
+  const isLoggedIn = !!userData;
 
   const { itemId } = await params;
-  const item = await getItemDetail(parseInt(itemId));
+  const item = await getItemDetail(parseInt(itemId), userData.id);
   const wishlistItems = await getUserWishlist();
 
   if (!item) {
@@ -87,6 +91,9 @@ export default async function ItemDetailPage({
                   itemId={item.id}
                   size="default"
                   isLoggedIn={isLoggedIn}
+                  isDisabled={
+                    item.status === "sold" || item.status === "reserved"
+                  }
                 />
 
                 <WishlistButton
@@ -94,6 +101,9 @@ export default async function ItemDetailPage({
                   initialWishlistItems={wishlistItems || []}
                   size="default"
                   isLoggedIn={isLoggedIn}
+                  isDisabled={
+                    item.status === "sold" || item.status === "reserved"
+                  }
                 />
               </div>
 
