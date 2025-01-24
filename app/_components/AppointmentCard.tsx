@@ -1,4 +1,5 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { formatDistanceToNow, format } from "date-fns";
@@ -18,6 +19,8 @@ import {
 } from "lucide-react";
 import { getImageUrls } from "../_lib/utils";
 import AppointmentTag from "./AppointmentTag";
+import { toast } from "sonner";
+import { updateMyAppointmentStatusAction } from "../_lib/action";
 
 interface AppointmentCardProps {
   appointment: MyAppointment;
@@ -29,6 +32,45 @@ export default function AppointmentCard({
   userId,
 }: AppointmentCardProps) {
   const isCurrentUserBuyer = appointment.buyer_id === userId;
+  const [currentUserStatus, setCurrentUserStatus] = useState(
+    isCurrentUserBuyer
+      ? appointment.status.buyer_status
+      : appointment.status.seller_status
+  );
+
+  const [isPending, setIsPending] = useState(false);
+  const [appointmentStatus, setAppointmentStatus] = useState(
+    appointment.status
+  );
+
+  async function handleStatusUpdate(status: "approved" | "canceled") {
+    try {
+      setIsPending(true);
+      const { success, updatedStatus } = await updateMyAppointmentStatusAction(
+        appointment.id,
+        isCurrentUserBuyer,
+        status,
+        status === "canceled" ? appointment.items.id : undefined
+      );
+
+      if (success && updatedStatus) {
+        setAppointmentStatus(updatedStatus);
+        setCurrentUserStatus(status);
+        toast.success(
+          status === "approved"
+            ? "Appointment approved"
+            : "Appointment canceled"
+        );
+      } else {
+        toast.error("Failed to update status");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to update status");
+    } finally {
+      setIsPending(false);
+    }
+  }
 
   return (
     <Card className="flex p-4 gap-4 bg-slate-50">
@@ -63,7 +105,7 @@ export default function AppointmentCard({
             </div>
             <AppointmentTag
               role={isCurrentUserBuyer ? "buy" : "sell"}
-              status={appointment.status.overall_status}
+              status={appointmentStatus.overall_status}
             />
           </div>
 
@@ -105,7 +147,7 @@ export default function AppointmentCard({
       </div>
 
       <div className="flex flex-col gap-2 justify-start">
-        {appointment.status.overall_status !== "pending" ? (
+        {currentUserStatus !== "pending" || isPending ? (
           <Button variant="outline" size="sm" className="w-28" disabled>
             <Pencil className="w-4 h-4 mr-2" />
             Edit
@@ -123,20 +165,22 @@ export default function AppointmentCard({
           variant="outline"
           size="sm"
           className="w-28"
-          disabled={appointment.status.overall_status !== "pending"}
+          onClick={() => handleStatusUpdate("approved")}
+          disabled={currentUserStatus !== "pending" || isPending}
         >
           <Check className="w-4 h-4 mr-2" />
-          Complete
+          {currentUserStatus === "approved" ? "Approved" : "Approve"}
         </Button>
 
         <Button
           variant="outline"
           size="sm"
           className="w-28"
-          disabled={appointment.status.overall_status !== "pending"}
+          onClick={() => handleStatusUpdate("canceled")}
+          disabled={currentUserStatus !== "pending" || isPending}
         >
           <X className="w-4 h-4 mr-2" />
-          Cancel
+          {currentUserStatus === "canceled" ? "Canceled" : "Cancel"}
         </Button>
 
         <Button variant="outline" size="sm" className="w-28">

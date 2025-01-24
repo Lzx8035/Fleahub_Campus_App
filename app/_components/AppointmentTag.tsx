@@ -27,7 +27,7 @@ export default function AppointmentTag({ role, status }: AppointmentTagProps) {
         variant="secondary"
         className={`${statusStyles[status]} text-white`}
       >
-        {status.charAt(0).toUpperCase() + status.slice(1)}
+        {status?.charAt(0).toUpperCase() + status?.slice(1)}
       </Badge>
     </div>
   );

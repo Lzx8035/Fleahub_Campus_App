@@ -89,12 +89,12 @@ export type MyItem = {
 };
 
 /////////////////////////////////////////////
-type AppointmentStatus = "pending" | "completed" | "canceled";
+export type AppointmentStatusType = "pending" | "completed" | "canceled";
 
-type AppointmentStatusObject = {
-  buyer_status: string;
-  seller_status: string;
-  overall_status: AppointmentStatus;
+export type AppointmentStatus = {
+  buyer_status: "pending" | "approved" | "canceled";
+  seller_status: "pending" | "approved" | "canceled";
+  overall_status: AppointmentStatusType;
   buyer_confirmed_at: string | null;
   seller_confirmed_at: string | null;
 };
@@ -106,7 +106,7 @@ export type MyAppointment = Omit<
   items: Database["public"]["Tables"]["items"]["Row"];
   buyer: Database["public"]["Tables"]["users"]["Row"];
   seller: Database["public"]["Tables"]["users"]["Row"];
-  status: AppointmentStatusObject;
+  status: AppointmentStatus;
 };
 
 /////////////////////////////////////////////

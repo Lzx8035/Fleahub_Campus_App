@@ -1,6 +1,7 @@
 "use server";
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
+import { AppointmentStatus } from "../_types";
 
 /////////////////////////////////////////////////////////////////
 // Wishlist Button
@@ -220,7 +221,59 @@ export async function deleteMyItemAction(itemId: number): Promise<boolean> {
 
 export async function EditOrCreateMyAppointmentAction() {}
 
-export async function CancelAppointment() {}
+export async function updateMyAppointmentStatusAction(
+  appointmentId: number,
+  isBuyer: boolean,
+  newStatus: "approved" | "canceled",
+  itemId?: number
+): Promise<{ success: boolean; updatedStatus?: AppointmentStatus }> {
+  try {
+    const supabase = await createClient();
 
-// ??? seller and buyer both agreed?
-export async function CompleteAppointment() {}
+    const { data: currentAppointment } = await supabase
+      .from("appointments")
+      .select("status")
+      .eq("id", appointmentId)
+      .single();
+
+    if (!currentAppointment) throw new Error("Appointment not found");
+
+    const currentStatus = currentAppointment.status as AppointmentStatus;
+
+    const newBuyerStatus = isBuyer ? newStatus : currentStatus.buyer_status;
+    const newSellerStatus = isBuyer ? currentStatus.seller_status : newStatus;
+
+    const updatedStatus = {
+      buyer_status: newBuyerStatus,
+      seller_status: newSellerStatus,
+      overall_status:
+        newStatus === "canceled"
+          ? "canceled"
+          : newBuyerStatus === "approved" && newSellerStatus === "approved"
+          ? "completed"
+          : "pending",
+      buyer_confirmed_at: currentStatus.buyer_confirmed_at,
+      seller_confirmed_at: currentStatus.seller_confirmed_at,
+    } as AppointmentStatus;
+
+    const { error } = await supabase
+      .from("appointments")
+      .update({ status: updatedStatus })
+      .eq("id", appointmentId);
+
+    if (error) throw error;
+
+    if (newStatus === "canceled" && itemId) {
+      await supabase
+        .from("items")
+        .update({ status: "available" })
+        .eq("id", itemId);
+    }
+
+    revalidatePath("/account/my_appointments");
+    return { success: true, updatedStatus };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
+  }
+}

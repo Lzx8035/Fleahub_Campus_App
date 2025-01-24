@@ -4,11 +4,11 @@ import {
   ItemDetail,
   MyAppointment,
   MyItem,
-} from "../_types";
+} from "@/app/_types";
 // Public
-import { createClient as createBrowserClient } from "./supabase/client";
+import { createClient as createBrowserClient } from "@/app/_lib/supabase/client";
 // With auth
-import { createClient as createServerClient } from "./supabase/server";
+import { createClient as createServerClient } from "@/app/_lib/supabase/server";
 
 /////////////////////////////////////////////////////////////////
 // Item Page
@@ -217,8 +217,8 @@ export async function getDashboardStats(userId: number) {
   const supabase = await createServerClient();
 
   type AppointmentStatus = {
-    buyer_status: "pending" | "confirmed" | "canceled";
-    seller_status: "pending" | "confirmed" | "canceled";
+    buyer_status: "pending" | "approved" | "canceled";
+    seller_status: "pending" | "approved" | "canceled";
     overall_status: "pending" | "completed" | "canceled";
     buyer_confirmed_at?: string | null;
     seller_confirmed_at?: string | null;
