@@ -42,7 +42,7 @@ export default async function MyAppointmentEditPage({
   }
 
   if (itemId) {
-    const itemData = await getItemDetail(Number(itemId));
+    const itemData = await getItemDetail(Number(itemId), userData.id);
 
     if (!itemData) {
       return <div>Item not available</div>;

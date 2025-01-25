@@ -5,6 +5,7 @@ import ImageCarousel from "@/app/_components/ImageCarousel";
 import WishlistButton from "@/app/_components/WishlistButton";
 import {
   getItemDetail,
+  getMyItems,
   getSupabaseUserData,
   getUserWishlist,
 } from "@/app/_lib/data_service";
@@ -30,6 +31,9 @@ export default async function ItemDetailPage({
   const { itemId } = await params;
   const item = await getItemDetail(parseInt(itemId), userData.id);
   const wishlistItems = await getUserWishlist();
+
+  const items = await getMyItems(userData.id);
+  const isMyItem = items.map((item) => item.id).includes(parseInt(itemId));
 
   if (!item) {
     notFound();
@@ -92,7 +96,9 @@ export default async function ItemDetailPage({
                   size="default"
                   isLoggedIn={isLoggedIn}
                   isDisabled={
-                    item.status === "sold" || item.status === "reserved"
+                    item.status === "sold" ||
+                    item.status === "reserved" ||
+                    isMyItem
                   }
                 />
 

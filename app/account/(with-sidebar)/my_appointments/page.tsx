@@ -1,7 +1,7 @@
 import React from "react";
 import { redirect } from "next/navigation";
 import OptionBar from "@/app/_components/OptionBar";
-import AppointmentCard from "@/app/_components/AppointmentCard";
+import MyAppointmentCard from "@/app/_components/MyAppointmentCard";
 import PaginationBar from "@/app/_components/PaginationBar";
 import {
   getMyAppointments,
@@ -73,7 +73,7 @@ export default async function AppointmentsPage({
 
       <div className="space-y-4">
         {paginatedItems.map((appointment) => (
-          <AppointmentCard
+          <MyAppointmentCard
             key={appointment.id}
             appointment={appointment}
             userId={userData.id!}

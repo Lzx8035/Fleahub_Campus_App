@@ -17,6 +17,7 @@ import { useRouter } from "next/navigation";
 import { Item } from "@/app/_types";
 import { getImageUrls } from "../_lib/utils";
 import Image from "next/image";
+import { EditOrCreateMyItemAction } from "@/app/_lib/action";
 
 interface ItemFormProps {
   initialData: Item | null;
@@ -46,7 +47,6 @@ export default function MyItemForm({ initialData }: ItemFormProps) {
     const [mainCategory] = initialData.categories.split("/");
     return mainCategory || "";
   });
-
   const [customCategory, setCustomCategory] = useState<string>(() => {
     if (!initialData?.categories) return "";
     const parts = initialData.categories.split("/");
@@ -55,45 +55,34 @@ export default function MyItemForm({ initialData }: ItemFormProps) {
 
   const router = useRouter();
 
-  // TODO NOT TESTED YET
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Build form data
     const formData = new FormData();
+
+    // 基本信息
     formData.append("title", title);
     formData.append("price", price.toString());
     formData.append("description", description);
     formData.append("categories", `${selectedCategory}/${customCategory}`);
 
-    // Add newly uploaded images
+    // 图片处理
+    formData.append("existingImages", JSON.stringify(imageUrls));
     images.forEach((image) => {
       formData.append("images", image);
     });
 
-    // Add existing image URLs
-    formData.append("existingImages", JSON.stringify(imageUrls));
+    // 如果是编辑模式，添加ID
+    if (initialData?.id) {
+      formData.append("id", initialData.id.toString());
+    }
 
-    // Send request
-    try {
-      const url = initialData?.id
-        ? `/api/items/${initialData.id}`
-        : "/api/items";
-      const method = initialData?.id ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        body: formData,
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save item");
-      }
-
-      // Redirect after successful submission
-      router.push("/items");
-    } catch (error) {
-      console.error("Error saving item:", error);
+    // 调用 Server Action
+    // for (const [key, value] of formData.entries()) {
+    //   console.log(key, value);
+    // }
+    const success = await EditOrCreateMyItemAction(formData);
+    if (success) {
+      router.push("/account/my_items");
     }
   };
 

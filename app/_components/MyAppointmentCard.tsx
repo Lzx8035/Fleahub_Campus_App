@@ -22,15 +22,15 @@ import AppointmentTag from "./AppointmentTag";
 import { toast } from "sonner";
 import { updateMyAppointmentStatusAction } from "../_lib/action";
 
-interface AppointmentCardProps {
+interface MyAppointmentCardProps {
   appointment: MyAppointment;
   userId: number;
 }
 
-export default function AppointmentCard({
+export default function MyAppointmentCard({
   appointment,
   userId,
-}: AppointmentCardProps) {
+}: MyAppointmentCardProps) {
   const isCurrentUserBuyer = appointment.buyer_id === userId;
   const [currentUserStatus, setCurrentUserStatus] = useState(
     isCurrentUserBuyer

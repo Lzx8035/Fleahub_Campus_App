@@ -2,6 +2,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "./supabase/server";
 import { AppointmentStatus } from "../_types";
+import { getImageUrls } from "./utils";
 
 /////////////////////////////////////////////////////////////////
 // Wishlist Button
@@ -99,7 +100,100 @@ export async function ToggleWishlistItemAction(itemId: number) {
 
 // My Items
 
-export async function EditOrCreateMyItemAction() {}
+export async function EditOrCreateMyItemAction(
+  formData: FormData
+): Promise<boolean> {
+  const supabase = await createClient();
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user?.email) throw new Error("Unauthorized");
+
+    const { data: userData } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", user.email)
+      .single();
+    if (!userData) throw new Error("User not found");
+
+    const itemId = formData.get("id");
+    const title = formData.get("title") as string;
+    const price = Number(formData.get("price"));
+    const description = formData.get("description") as string;
+    const categories = formData.get("categories") as string;
+    const existingImages = getImageUrls(
+      formData.get("existingImages") as string
+    );
+    const newImages = formData.getAll("images") as File[];
+
+    const imageUrls = [...existingImages].filter((url) =>
+      url.startsWith("https://szlmetwvtwtkmsaupqaj.supabase.co")
+    );
+    for (const image of newImages) {
+      const { data, error } = await supabase.storage
+        .from("item-images")
+        .upload(`${userData.id}/${Date.now()}-${image.name}`, image);
+      if (error) throw error;
+
+      const publicUrl = `https://szlmetwvtwtkmsaupqaj.supabase.co/storage/v1/object/public/item-images/${data.path}`;
+      imageUrls.push(publicUrl);
+    }
+
+    const itemData = {
+      title,
+      price,
+      description,
+      categories,
+      images: JSON.stringify(imageUrls),
+      seller_id: userData.id,
+      status: "available" as const,
+      update_at: new Date().toISOString(),
+    };
+
+    if (itemId) {
+      const { error } = await supabase
+        .from("items")
+        .update(itemData)
+        .eq("id", itemId)
+        .eq("seller_id", userData.id);
+      if (error) throw error;
+    } else {
+      const { data: maxIdData } = await supabase
+        .from("items")
+        .select("id")
+        .order("id", { ascending: false })
+        .limit(1)
+        .single();
+
+      const newId = (maxIdData?.id || 0) + 1;
+
+      const { error } = await supabase
+        .from("items")
+        .insert({ ...itemData, id: newId });
+      if (error) throw error;
+    }
+
+    revalidatePath("/items");
+    revalidatePath("/account/my_items");
+    return true;
+  } catch (error) {
+    const err = error as {
+      code?: string;
+      message?: string;
+      details?: string;
+      hint?: string;
+    };
+    console.error("Full Error details:", {
+      code: err.code,
+      message: err.message,
+      details: err.details,
+      hint: err.hint,
+    });
+    return false;
+  }
+}
 
 export async function toggleMyItemReserveAction(
   itemId: number
