@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 
 import { toast } from "sonner";
-import { ToggleWishlistItemAction } from "../_lib/action";
-import { CustomAlertDialog } from "./CustomAlertDialog";
-import { isItemInWishlist } from "../_lib/utils";
+import { ToggleWishlistItemAction } from "@/app/_lib/action";
+import { CustomAlertDialog } from "@/app/_components/CustomAlertDialog";
+import { isItemInWishlist } from "@/app/_lib/utils";
 
 interface WishlistButtonProps {
   itemId: number;

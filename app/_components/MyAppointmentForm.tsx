@@ -14,10 +14,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarIcon, Clock, MapPin, Banknote } from "lucide-react";
-import type { ItemDetail, MyAppointment } from "@/app/_types";
-import { getImageUrls } from "../_lib/utils";
-import AppointmentTag from "./AppointmentTag";
+import { CalendarIcon, Clock, MapPin, Banknote, Loader2 } from "lucide-react";
+import type { ItemDetail, MyAppointment, PaymentMethod } from "@/app/_types";
+import { getImageUrls } from "@/app/_lib/utils";
+import AppointmentTag from "@/app/_components/AppointmentTag";
+import { EditOrCreateMyAppointmentAction } from "@/app/_lib/action";
+import { toast } from "sonner";
 
 const locations = [
   { value: "student_center", label: "Student Center" },
@@ -33,8 +35,6 @@ interface AppointmentFormProps {
   userId: number;
 }
 
-type PaymentMethod = "cash" | "emt" | "both";
-
 export default function MyAppointmentForm({
   mode,
   itemData,
@@ -42,6 +42,8 @@ export default function MyAppointmentForm({
   userId,
 }: AppointmentFormProps) {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const isEditMode = mode === "edit";
   const isCurrentUserBuyer = isEditMode
     ? appointmentData?.buyer_id === userId
@@ -49,7 +51,6 @@ export default function MyAppointmentForm({
 
   const displayItem = isEditMode ? appointmentData?.items : itemData!;
 
-  // 状态初始化
   const [meetingDate, setMeetingDate] = useState(() => {
     if (!isEditMode) return "";
     if (!appointmentData?.meeting_time) return "";
@@ -86,39 +87,43 @@ export default function MyAppointmentForm({
     return (appointmentData?.payment_method as PaymentMethod) || "both";
   });
 
-  // TODO not texted yet
+  if (!displayItem) {
+    return <div>No item data available</div>;
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const formData = new FormData();
-    const combinedDateTime = `${meetingDate} ${meetingTime}:00`;
-
-    formData.append("meeting_time", combinedDateTime);
-    formData.append("meeting_location", location);
-    formData.append("payment_method", paymentMethod);
-
-    if (!isEditMode) {
-      // 新建模式需要额外的数据
-      formData.append("item_id", itemData?.id.toString() || "");
+    if (!meetingDate || !meetingTime) {
+      toast.error("Please select meeting time");
+      return;
     }
 
     try {
-      const url = isEditMode
-        ? `/api/appointments/${appointmentData?.id}`
-        : "/api/appointments";
+      setIsSubmitting(true);
+      const formData = new FormData();
 
-      const response = await fetch(url, {
-        method: isEditMode ? "PUT" : "POST",
-        body: formData,
-      });
+      const combinedDateTime = `${meetingDate} ${meetingTime}:00`;
+      formData.append("meeting_time", combinedDateTime);
+      formData.append("meeting_location", location);
+      formData.append("payment_method", paymentMethod);
 
-      if (!response.ok) {
-        throw new Error("Failed to save appointment");
+      if (!isEditMode && itemData?.id) {
+        formData.append("item_id", itemData.id.toString());
+      } else if (appointmentData?.id) {
+        formData.append("id", appointmentData.id.toString());
       }
 
-      router.push("/appointments");
+      const success = await EditOrCreateMyAppointmentAction(formData);
+      if (success) {
+        router.push("/account/my_appointments");
+      } else {
+        toast.error("Failed to save appointment");
+      }
     } catch (error) {
-      console.error("Error saving appointment:", error);
+      toast.error("Something went wrong");
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -275,15 +280,18 @@ export default function MyAppointmentForm({
               <Button
                 type="submit"
                 className="bg-indigo-500 hover:bg-indigo-600"
+                disabled={isSubmitting}
               >
-                {isEditMode ? "Update Appointment" : "Create Appointment"}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-              >
-                Cancel
+                {isSubmitting ? (
+                  <span className="flex items-center">
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isEditMode ? "Updating..." : "Creating..."}
+                  </span>
+                ) : isEditMode ? (
+                  "Update Appointment"
+                ) : (
+                  "Create Appointment"
+                )}
               </Button>
             </div>
           </form>

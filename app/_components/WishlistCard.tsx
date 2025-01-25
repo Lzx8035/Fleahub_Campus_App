@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from "date-fns";
 import Link from "next/link";
 import Image from "next/image";
-import { getImageUrls } from "../_lib/utils";
-import WishlistButton from "./WishlistButton";
+import { getImageUrls } from "@/app/_lib/utils";
+import WishlistButton from "@/app/_components/WishlistButton";
 import type { WishlistItems } from "@/app/_types";
 
 interface WishlistCardProps {

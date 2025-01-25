@@ -12,12 +12,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ImagePlus, X } from "lucide-react";
+import { ImagePlus, Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Item } from "@/app/_types";
-import { getImageUrls } from "../_lib/utils";
+import { getImageUrls } from "@/app/_lib/utils";
 import Image from "next/image";
 import { EditOrCreateMyItemAction } from "@/app/_lib/action";
+import { toast } from "sonner";
 
 interface ItemFormProps {
   initialData: Item | null;
@@ -33,6 +34,8 @@ const categories = [
 ] as const;
 
 export default function MyItemForm({ initialData }: ItemFormProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const [images, setImages] = useState<File[]>([]);
   const [imageUrls, setImageUrls] = useState<string[]>(
     getImageUrls(initialData?.images || "") || []
@@ -57,32 +60,65 @@ export default function MyItemForm({ initialData }: ItemFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const formData = new FormData();
 
-    // 基本信息
-    formData.append("title", title);
-    formData.append("price", price.toString());
-    formData.append("description", description);
-    formData.append("categories", `${selectedCategory}/${customCategory}`);
-
-    // 图片处理
-    formData.append("existingImages", JSON.stringify(imageUrls));
-    images.forEach((image) => {
-      formData.append("images", image);
-    });
-
-    // 如果是编辑模式，添加ID
-    if (initialData?.id) {
-      formData.append("id", initialData.id.toString());
+    if (!title.trim()) {
+      toast.error("Please enter a title");
+      return;
+    }
+    if (!description.trim()) {
+      toast.error("Please enter a description");
+      return;
+    }
+    if (!selectedCategory) {
+      toast.error("Please select a category");
+      return;
+    }
+    if (imageUrls.length === 0) {
+      toast.error("Please add at least one image");
+      return;
+    }
+    if (price <= 0) {
+      toast.error("Please enter a valid price");
+      return;
     }
 
-    // 调用 Server Action
-    // for (const [key, value] of formData.entries()) {
-    //   console.log(key, value);
-    // }
-    const success = await EditOrCreateMyItemAction(formData);
-    if (success) {
-      router.push("/account/my_items");
+    try {
+      setIsSubmitting(true);
+      const formData = new FormData();
+
+      formData.append("title", title);
+      formData.append("price", price.toString());
+      formData.append("description", description);
+      formData.append("categories", `${selectedCategory}/${customCategory}`);
+
+      formData.append(
+        "existingImages",
+        JSON.stringify(
+          imageUrls.filter((url) =>
+            url.startsWith("https://szlmetwvtwtkmsaupqaj.supabase.co")
+          )
+        )
+      );
+
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+
+      if (initialData?.id) {
+        formData.append("id", initialData.id.toString());
+      }
+
+      const success = await EditOrCreateMyItemAction(formData);
+      if (success) {
+        router.push("/account/my_items");
+      } else {
+        toast.error("Failed to save item");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Something went wrong");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -209,11 +245,21 @@ export default function MyItemForm({ initialData }: ItemFormProps) {
       </div>
 
       <div className="flex gap-4">
-        <Button type="submit" className="bg-indigo-500 hover:bg-indigo-600">
-          {initialData ? "Update Item" : "Create Item"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
+        <Button
+          type="submit"
+          className="bg-indigo-500 hover:bg-indigo-600"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <span className="flex items-center">
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              {initialData ? "Updating..." : "Creating..."}
+            </span>
+          ) : initialData ? (
+            "Update Item"
+          ) : (
+            "Create Item"
+          )}
         </Button>
       </div>
     </form>

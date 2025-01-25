@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 import Link from "next/link";
-import { getSupabaseUserData } from "../_lib/data_service";
-import UserMenu from "./UserMenu";
+import { getSupabaseUserData } from "@/app/_lib/data_service";
+import UserMenu from "@/app/_components/UserMenu";
 
 export default async function Header() {
   const userData = await getSupabaseUserData();

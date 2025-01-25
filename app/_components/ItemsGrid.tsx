@@ -3,11 +3,11 @@
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Item, WishlistItems } from "../_types";
+import { Item, WishlistItems } from "@/app/_types";
 import Link from "next/link";
-import { getImageUrls } from "../_lib/utils";
+import { getImageUrls } from "@/app/_lib/utils";
 import { formatDistanceToNow } from "date-fns";
-import WishlistButton from "./WishlistButton";
+import WishlistButton from "@/app/_components/WishlistButton";
 
 interface ItemsGridProps {
   items: Item[];

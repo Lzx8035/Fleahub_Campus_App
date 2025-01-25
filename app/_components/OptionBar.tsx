@@ -12,7 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
-import { SortOption } from "../_types";
+import { SortOption } from "@/app/_types";
 
 interface SortOptionProps {
   sortOptions: SortOption[];

@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import Link from "next/link";
-import PaginationBar from "../_components/PaginationBar";
-import WishlistCard from "../_components/WishlistCard";
-import { getUserWishlist } from "../_lib/data_service";
+import PaginationBar from "@/app/_components/PaginationBar";
+import WishlistCard from "@/app/_components/WishlistCard";
+import { getUserWishlist } from "@/app/_lib/data_service";
 import { getClientPagination } from "@/app/_lib/utils";
-import { WishlistItem } from "../_types";
+import { WishlistItem } from "@/app/_types";
 
 export const metadata = {
   title: "Wishlist",

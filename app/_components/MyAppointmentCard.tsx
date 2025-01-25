@@ -17,10 +17,10 @@ import {
   Pencil,
   Handshake,
 } from "lucide-react";
-import { getImageUrls } from "../_lib/utils";
-import AppointmentTag from "./AppointmentTag";
+import { getImageUrls } from "@/app/_lib/utils";
+import AppointmentTag from "@/app/_components/AppointmentTag";
 import { toast } from "sonner";
-import { updateMyAppointmentStatusAction } from "../_lib/action";
+import { updateMyAppointmentStatusAction } from "@/app/_lib/action";
 
 interface MyAppointmentCardProps {
   appointment: MyAppointment;
@@ -124,7 +124,12 @@ export default function MyAppointmentCard({
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4 text-slate-400" />
-              <span>{appointment.meeting_location}</span>
+              <span>
+                {appointment.meeting_location
+                  .split("_")
+                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                  .join(" ")}
+              </span>
             </div>
             <div className="flex items-center gap-2">
               <User className="w-4 h-4 text-slate-400" />

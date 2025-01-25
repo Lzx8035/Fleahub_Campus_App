@@ -1,8 +1,8 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import { createClient } from "./supabase/server";
-import { AppointmentStatus } from "../_types";
-import { getImageUrls } from "./utils";
+import { createClient } from "@/app/_lib/supabase/server";
+import { AppointmentStatus, PaymentMethod } from "@/app/_types";
+import { getImageUrls } from "@/app/_lib/utils";
 
 /////////////////////////////////////////////////////////////////
 // Wishlist Button
@@ -313,7 +313,91 @@ export async function deleteMyItemAction(itemId: number): Promise<boolean> {
 
 // My Appointments
 
-export async function EditOrCreateMyAppointmentAction() {}
+export async function EditOrCreateMyAppointmentAction(
+  formData: FormData
+): Promise<boolean> {
+  const supabase = await createClient();
+
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user?.email) throw new Error("Unauthorized");
+
+    const { data: userData } = await supabase
+      .from("users")
+      .select("id")
+      .eq("email", user.email)
+      .single();
+    if (!userData) throw new Error("User not found");
+
+    const appointmentId = Number(formData.get("id")) || null;
+    const itemId = Number(formData.get("item_id"));
+    const meetingTime = new Date(
+      formData.get("meeting_time") as string
+    ).toISOString();
+    const meetingLocation = formData.get("meeting_location") as string;
+    const paymentMethod = formData.get("payment_method") as string;
+
+    if (!appointmentId) {
+      const { data: itemData } = await supabase
+        .from("items")
+        .select("seller_id")
+        .eq("id", itemId)
+        .single();
+      if (!itemData) throw new Error("Item not found");
+
+      const { data: maxIdData } = await supabase
+        .from("appointments")
+        .select("id")
+        .order("id", { ascending: false })
+        .limit(1)
+        .single();
+
+      const insertData = {
+        id: (maxIdData?.id || 0) + 1,
+        item_id: itemId,
+        buyer_id: userData.id,
+        seller_id: itemData.seller_id,
+        meeting_time: meetingTime,
+        meeting_location: meetingLocation,
+        payment_method: paymentMethod as PaymentMethod,
+        status: {
+          buyer_status: "pending",
+          seller_status: "pending",
+          overall_status: "pending",
+          buyer_confirmed_at: null,
+          seller_confirmed_at: null,
+        },
+      };
+
+      const { error } = await supabase
+        .from("appointments")
+        .insert(insertData)
+        .select();
+      if (error) throw error;
+
+      await supabase.from("items").update({ status: "sold" }).eq("id", itemId);
+    } else {
+      const { error } = await supabase
+        .from("appointments")
+        .update({
+          meeting_time: meetingTime,
+          meeting_location: meetingLocation,
+          payment_method: paymentMethod as PaymentMethod,
+        })
+        .eq("id", appointmentId);
+      if (error) throw error;
+    }
+
+    revalidatePath("/appointments");
+    revalidatePath("/account/my_appointments");
+    return true;
+  } catch (error) {
+    console.error("Error:", error);
+    return false;
+  }
+}
 
 export async function updateMyAppointmentStatusAction(
   appointmentId: number,

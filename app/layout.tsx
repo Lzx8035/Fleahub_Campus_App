@@ -2,7 +2,7 @@ import "@/app/_styles/globals.css";
 import Header from "@/app/_components/Header";
 
 import { Toaster } from "sonner";
-import ScrollToTop from "./_components/ScrollToTop";
+import ScrollToTop from "@/app/_components/ScrollToTop";
 
 export const metadata = {
   title: {

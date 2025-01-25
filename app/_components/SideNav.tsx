@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { CustomAlertDialog } from "./CustomAlertDialog";
-import { signOut } from "../_lib/auth";
+import { signOut } from "@/app/_lib/auth";
 import { LogOut } from "lucide-react";
 
 const sideNavItems = [

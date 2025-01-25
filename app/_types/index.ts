@@ -113,3 +113,6 @@ export type MyAppointment = Omit<
 export type ItemDetail = Database["public"]["Tables"]["items"]["Row"] & {
   seller: Database["public"]["Tables"]["users"]["Row"];
 };
+
+///////
+export type PaymentMethod = "cash" | "emt" | "both";

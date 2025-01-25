@@ -19,7 +19,7 @@ import {
   toggleMyItemReserveAction,
 } from "@/app/_lib/action";
 import { toast } from "sonner";
-import { CustomAlertDialog } from "./CustomAlertDialog";
+import { CustomAlertDialog } from "@/app/_components/CustomAlertDialog";
 
 interface ItemCardProps {
   myItem: MyItem;

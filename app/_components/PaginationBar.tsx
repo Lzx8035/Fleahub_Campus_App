@@ -1,6 +1,6 @@
 "use client";
 
-import { PageOption } from "../_types";
+import { PageOption } from "@/app/_types";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Pagination,

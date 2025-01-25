@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 
-import { CategoryCount } from "../_types";
+import { CategoryCount } from "@/app/_types";
 
 interface CategoriesBarProps {
   currentCategory: string;

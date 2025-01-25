@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { signOut } from "@/app/_lib/auth";
-import { CustomAlertDialog } from "./CustomAlertDialog";
+import { CustomAlertDialog } from "@/app/_components/CustomAlertDialog";
 import { LogOut } from "lucide-react";
 
 interface UserData {
