@@ -19,10 +19,19 @@ export type CategoryCount = {
   count: number;
 };
 
+////////////////////////////////////
+
 export interface SearchParams {
   page?: string;
   category?: string;
   sort?: string;
+  id?: string;
+  itemId?: string;
+}
+
+export interface Params {
+  id?: string;
+  itemId?: string;
 }
 
 ////////////

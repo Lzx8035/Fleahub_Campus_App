@@ -3,6 +3,7 @@ import Header from "@/app/_components/Header";
 
 import { Toaster } from "sonner";
 import ScrollToTop from "@/app/_components/ScrollToTop";
+import React, { Suspense } from "react";
 
 export const metadata = {
   title: {
@@ -21,7 +22,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen flex flex-col">
-        <ScrollToTop />
+        <Suspense fallback={<div>Loading...</div>}>
+          <ScrollToTop />
+        </Suspense>
         <Header />
         <main className="flex-1 mt-0">{children}</main>
         <Toaster />

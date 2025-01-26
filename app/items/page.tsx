@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import {
   getItemsBySearchParams,
   getMainCategoriesCount,
@@ -5,8 +6,8 @@ import {
 } from "@/app/_lib/data_service";
 
 import ItemsGrid from "@/app/_components/ItemsGrid";
-import CategoriesBar from "@/app/_components/CategoriesBar";
 import OptionBar from "@/app/_components/OptionBar";
+import CategoriesBar from "@/app/_components/CategoriesBar";
 import PaginationBar from "@/app/_components/PaginationBar";
 
 import { SortOption, PageOption, SearchParams } from "@/app/_types";
@@ -25,7 +26,7 @@ const sortOptions: Array<SortOption> = [
 export default async function ItemsPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const supabase = await createClient();
   const {
@@ -34,16 +35,9 @@ export default async function ItemsPage({
   const isLoggedIn = !!session;
 
   const awaitedSearchParams = await searchParams;
-
-  function getParams() {
-    return {
-      page: Number(awaitedSearchParams?.page) || 1,
-      category: awaitedSearchParams?.category || "all",
-      sort: awaitedSearchParams?.sort || "newest",
-    };
-  }
-
-  const { page, category, sort } = await getParams();
+  const page = Number(awaitedSearchParams?.page) || 1;
+  const category = awaitedSearchParams?.category || "all";
+  const sort = awaitedSearchParams?.sort || "newest";
 
   const { items, totalPages } = await getItemsBySearchParams(
     page,
@@ -64,14 +58,20 @@ export default async function ItemsPage({
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
-      <OptionBar sortOptions={sortOptions} currentSort={sort} page="items" />
-      <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
+      <Suspense fallback={<div>Loading options...</div>}>
+        <OptionBar sortOptions={sortOptions} currentSort={sort} page="items" />
+      </Suspense>
+      <Suspense fallback={<div>Loading categories...</div>}>
+        <CategoriesBar currentCategory={category} itemsCount={itemsCount} />
+      </Suspense>
       <ItemsGrid
         items={items}
         initialWishlistItems={wishlistItems || []}
         isLoggedIn={isLoggedIn}
       />
-      <PaginationBar pageOption={pageOption} page={"items"} />
+      <Suspense fallback={<div>Loading pagination...</div>}>
+        <PaginationBar pageOption={pageOption} page={"items"} />
+      </Suspense>
     </div>
   );
 }

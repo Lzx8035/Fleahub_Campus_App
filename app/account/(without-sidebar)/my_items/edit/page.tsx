@@ -1,12 +1,12 @@
 import MyItemForm from "@/app/_components/MyItemForm";
 import { getMyItemDetail, getSupabaseUserData } from "@/app/_lib/data_service";
-import { Item } from "@/app/_types";
+import { Item, SearchParams } from "@/app/_types";
 import { redirect } from "next/navigation";
 
 export default async function MyItemEditPage({
   searchParams,
 }: {
-  searchParams: { id?: string };
+  searchParams: Promise<SearchParams>;
 }) {
   let initialData: Item | null = null;
 

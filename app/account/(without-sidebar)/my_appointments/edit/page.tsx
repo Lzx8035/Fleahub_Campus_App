@@ -4,12 +4,13 @@ import {
   getMyAppointmentDetail,
   getSupabaseUserData,
 } from "@/app/_lib/data_service";
+import { SearchParams } from "@/app/_types";
 import { redirect } from "next/navigation";
 
 export default async function MyAppointmentEditPage({
   searchParams,
 }: {
-  searchParams: { id?: string; itemId?: string };
+  searchParams: Promise<SearchParams>;
 }) {
   const userData = await getSupabaseUserData();
 

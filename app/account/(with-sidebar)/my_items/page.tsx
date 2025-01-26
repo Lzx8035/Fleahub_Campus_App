@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import OptionBar from "@/app/_components/OptionBar";
@@ -24,22 +25,23 @@ const sortOptions = [
 export default async function MyItemsPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const userData = await getSupabaseUserData();
   const myItems = await getMyItems(userData!.id!);
-  const { sort } = await searchParams;
-  const currentSort = sort || "all";
+
+  const resolvedSearchParams = await searchParams;
+  const { sort = "all" } = resolvedSearchParams;
 
   const sortedItems = getClientSort<MyItem>({
     items: myItems,
-    currentSort,
+    currentSort: sort,
     sortConfig: createMyItemsSortConfig(),
   });
 
   const { paginatedItems, pageOption, hasMultiplePages } =
     await getClientPagination<MyItem>({
-      searchParams,
+      searchParams: resolvedSearchParams,
       items: sortedItems,
     });
 
@@ -73,25 +75,31 @@ export default async function MyItemsPage({
             Add New Item
           </Link>
         </Button>
-        <div className="w-full sm:w-auto sm:flex-1 sm:max-w-2xl sm:ml-6">
-          <OptionBar
-            sortOptions={sortOptions}
-            currentSort={currentSort}
-            page="account/my_items"
-          />
-        </div>
+        <Suspense fallback={<div>Loading options...</div>}>
+          <div className="w-full sm:w-auto sm:flex-1 sm:max-w-2xl sm:ml-6">
+            <OptionBar
+              sortOptions={sortOptions}
+              currentSort={sort}
+              page="account/my_items"
+            />
+          </div>
+        </Suspense>
       </div>
 
-      <div className="space-y-4">
-        {paginatedItems.map((item) => (
-          <MyItemCard key={item.id} myItem={item} />
-        ))}
-      </div>
+      <Suspense fallback={<div>Loading items...</div>}>
+        <div className="space-y-4">
+          {paginatedItems.map((item) => (
+            <MyItemCard key={item.id} myItem={item} />
+          ))}
+        </div>
+      </Suspense>
 
       {hasMultiplePages && (
-        <div className="mt-8 flex justify-center">
-          <PaginationBar pageOption={pageOption} page="account/my_items" />
-        </div>
+        <Suspense fallback={<div>Loading pagination...</div>}>
+          <div className="mt-8 flex justify-center">
+            <PaginationBar pageOption={pageOption} page="account/my_items" />
+          </div>
+        </Suspense>
       )}
     </div>
   );

@@ -1,3 +1,4 @@
+import React, { Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import Link from "next/link";
@@ -18,7 +19,7 @@ interface SearchParams {
 export default async function WishlistPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
   const wishItems = await getUserWishlist();
 
@@ -39,9 +40,11 @@ export default async function WishlistPage({
     );
   }
 
+  const resolvedSearchParams = await searchParams;
+
   const { paginatedItems, pageOption, hasMultiplePages } =
     await getClientPagination<WishlistItem>({
-      searchParams,
+      searchParams: resolvedSearchParams,
       items: wishItems,
     });
 
@@ -49,13 +52,17 @@ export default async function WishlistPage({
     <div className="min-h-[calc(100vh-4rem)] flex flex-col">
       <div className="flex-1 max-w-7xl mx-auto px-4 py-8 w-full">
         <div className="grid grid-cols-1 gap-4 mb-8">
-          {paginatedItems.map((item) => (
-            <WishlistCard key={item.id} item={item} wishItems={wishItems} />
-          ))}
+          <Suspense fallback={<div>Loading wishlist...</div>}>
+            {paginatedItems.map((item) => (
+              <WishlistCard key={item.id} item={item} wishItems={wishItems} />
+            ))}
+          </Suspense>
         </div>
 
         {hasMultiplePages && (
-          <PaginationBar pageOption={pageOption} page="wishlist" />
+          <Suspense fallback={<div>Loading pagination...</div>}>
+            <PaginationBar pageOption={pageOption} page="wishlist" />
+          </Suspense>
         )}
       </div>
     </div>

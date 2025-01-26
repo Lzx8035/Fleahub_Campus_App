@@ -1,4 +1,10 @@
-import { Json, MyAppointment, MyItem, WishlistItems } from "@/app/_types";
+import {
+  Json,
+  MyAppointment,
+  MyItem,
+  SearchParams,
+  WishlistItems,
+} from "@/app/_types";
 
 export function getImageUrls(imageJson: Json): string[] {
   if (!imageJson) return [];
@@ -27,7 +33,7 @@ export function isItemInWishlist(itemId: number, wishlistItems: WishlistItems) {
 export const ITEMS_PER_PAGE = 4;
 
 export interface ClientPaginationParams<T> {
-  searchParams: { page?: string };
+  searchParams: SearchParams;
   items: T[];
 }
 

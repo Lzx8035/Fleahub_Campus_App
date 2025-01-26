@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { redirect } from "next/navigation";
 import OptionBar from "@/app/_components/OptionBar";
 import MyAppointmentCard from "@/app/_components/MyAppointmentCard";
@@ -21,11 +21,11 @@ const sortOptions = [
   { label: "Oldest", value: "oldest" },
 ];
 
-export default async function AppointmentsPage({
-  searchParams,
-}: {
-  searchParams: SearchParams;
-}) {
+interface PageProps {
+  searchParams: Promise<SearchParams>;
+}
+
+export default async function AppointmentsPage({ searchParams }: PageProps) {
   const userData = await getSupabaseUserData();
 
   if (!userData) {
@@ -33,8 +33,9 @@ export default async function AppointmentsPage({
   }
 
   const myAppointments = await getMyAppointments(userData.id!);
-  const { sort } = await searchParams;
-  const currentSort = sort || "all";
+
+  const resolvedSearchParams = await searchParams;
+  const { sort = "all" } = resolvedSearchParams;
 
   if (!myAppointments?.length) {
     return (
@@ -51,45 +52,51 @@ export default async function AppointmentsPage({
 
   const sortedItems = getClientSort<MyAppointment>({
     items: myAppointments,
-    currentSort,
+    currentSort: sort,
     sortConfig: createAppointmentSortConfig(),
   });
 
   const { paginatedItems, pageOption, hasMultiplePages } =
     await getClientPagination<MyAppointment>({
-      searchParams,
+      searchParams: resolvedSearchParams,
       items: sortedItems,
     });
 
   return (
     <div className="space-y-6">
-      <div className="w-full">
-        <OptionBar
-          sortOptions={sortOptions}
-          currentSort={currentSort}
-          page="account/my_appointments"
-        />
-      </div>
-
-      <div className="space-y-4">
-        {paginatedItems.map((appointment) => (
-          <MyAppointmentCard
-            key={appointment.id}
-            appointment={appointment}
-            userId={userData.id!}
-          />
-        ))}
-      </div>
-
-      {hasMultiplePages && (
-        <div className="mt-8 flex justify-center">
-          <PaginationBar
-            pageOption={pageOption}
+      <Suspense fallback={<div>Loading options...</div>}>
+        <div className="w-full">
+          <OptionBar
+            sortOptions={sortOptions}
+            currentSort={sort}
             page="account/my_appointments"
-            showEdges={true}
-            siblingCount={1}
           />
         </div>
+      </Suspense>
+
+      <Suspense fallback={<div>Loading appointments...</div>}>
+        <div className="space-y-4">
+          {paginatedItems.map((appointment) => (
+            <MyAppointmentCard
+              key={appointment.id}
+              appointment={appointment}
+              userId={userData.id!}
+            />
+          ))}
+        </div>
+      </Suspense>
+
+      {hasMultiplePages && (
+        <Suspense fallback={<div>Loading pagination...</div>}>
+          <div className="mt-8 flex justify-center">
+            <PaginationBar
+              pageOption={pageOption}
+              page="account/my_appointments"
+              showEdges={true}
+              siblingCount={1}
+            />
+          </div>
+        </Suspense>
       )}
     </div>
   );

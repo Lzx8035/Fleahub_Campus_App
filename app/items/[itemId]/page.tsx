@@ -15,11 +15,12 @@ import { formatDistanceToNow } from "date-fns";
 import { MessageCircle } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { CircleX } from "lucide-react";
+import { Params } from "@/app/_types";
 
 export default async function ItemDetailPage({
   params,
 }: {
-  params: { itemId: string };
+  params: Promise<Params>;
 }) {
   const userData = await getSupabaseUserData();
 
@@ -28,16 +29,22 @@ export default async function ItemDetailPage({
   }
   const isLoggedIn = !!userData;
 
-  const { itemId } = await params;
+  const resolvedParams = await params;
+  const { itemId } = resolvedParams;
+
+  if (!itemId) {
+    notFound();
+  }
+
   const item = await getItemDetail(parseInt(itemId), userData.id);
   const wishlistItems = await getUserWishlist();
-
-  const items = await getMyItems(userData.id);
-  const isMyItem = items.map((item) => item.id).includes(parseInt(itemId));
 
   if (!item) {
     notFound();
   }
+
+  const items = await getMyItems(userData.id);
+  const isMyItem = items.map((item) => item.id).includes(parseInt(itemId));
 
   const images = getImageUrls(item.images);
 
