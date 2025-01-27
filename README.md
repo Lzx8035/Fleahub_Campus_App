@@ -1,5 +1,7 @@
 # FleaHub Campus Marketplace
 
+🔗：https://fleahub-campus-app.vercel.app/
+
 A modern second-hand trading platform designed specifically for university students. Users can list items, chat with buyers/sellers, and arrange face-to-face transactions safely on campus.
 
 ## Tech Stack
