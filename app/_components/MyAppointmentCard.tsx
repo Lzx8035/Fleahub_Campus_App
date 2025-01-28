@@ -152,7 +152,9 @@ export default function MyAppointmentCard({
       </div>
 
       <div className="flex flex-col gap-2 justify-start">
-        {currentUserStatus !== "pending" || isPending ? (
+        {currentUserStatus !== "pending" ||
+        isPending ||
+        appointment.status.overall_status === "canceled" ? (
           <Button variant="outline" size="sm" className="w-28" disabled>
             <Pencil className="w-4 h-4 mr-2" />
             Edit
@@ -171,7 +173,11 @@ export default function MyAppointmentCard({
           size="sm"
           className="w-28"
           onClick={() => handleStatusUpdate("approved")}
-          disabled={currentUserStatus !== "pending" || isPending}
+          disabled={
+            currentUserStatus !== "pending" ||
+            isPending ||
+            appointment.status.overall_status === "canceled"
+          }
         >
           <Check className="w-4 h-4 mr-2" />
           {currentUserStatus === "approved" ? "Approved" : "Approve"}
@@ -182,7 +188,11 @@ export default function MyAppointmentCard({
           size="sm"
           className="w-28"
           onClick={() => handleStatusUpdate("canceled")}
-          disabled={currentUserStatus !== "pending" || isPending}
+          disabled={
+            currentUserStatus !== "pending" ||
+            isPending ||
+            appointment.status.overall_status === "canceled"
+          }
         >
           <X className="w-4 h-4 mr-2" />
           {currentUserStatus === "canceled" ? "Canceled" : "Cancel"}
